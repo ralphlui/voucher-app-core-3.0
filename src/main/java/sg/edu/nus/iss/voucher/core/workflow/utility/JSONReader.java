@@ -31,4 +31,9 @@ public class JSONReader {
 	public Boolean getSuccessFromResponse(JSONObject jsonResponse) {
 		return (Boolean) jsonResponse.get("success");
 	}
+	
+	public int getStatusFromResponse(JSONObject jsonResponse) {
+		Long status = (Long) jsonResponse.get("status");
+		return status.intValue();
+	}
 }
