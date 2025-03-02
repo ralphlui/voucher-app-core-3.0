@@ -54,10 +54,10 @@ public class JwtValidationFilter extends OncePerRequestFilter {
 			try {
 				JSONObject jsonResponse = jsonReader.parseJsonResponse(responseStr);
 				Boolean isValid = jsonReader.getSuccessFromResponse(jsonResponse);
-				String message = jsonReader.getMessageFromResponse(jsonResponse);
-				int status = jsonReader.getStatusFromResponse(jsonResponse);
 
 				if (!isValid) {
+					String message = jsonReader.getMessageFromResponse(jsonResponse);
+					int status = jsonReader.getStatusFromResponse(jsonResponse);
 					handleException(response, message, status);
 					return;
 				}
