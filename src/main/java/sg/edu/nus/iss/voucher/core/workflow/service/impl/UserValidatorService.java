@@ -24,11 +24,11 @@ public class UserValidatorService {
 	@Autowired
 	private JSONReader jsonReader;
 
-	public HashMap<Boolean, String> validateActiveUser(String userId, String validatedRole) {
+	public HashMap<Boolean, String> validateActiveUser(String userId, String validatedRole, String authorizationHeader) {
 	    HashMap<Boolean, String> resultMap = new HashMap<Boolean, String>();
 
 	    try {
-	        String responseStr = apiCall.validateActiveUser(userId);
+	        String responseStr = apiCall.validateActiveUser(userId, authorizationHeader);
 	        JSONObject jsonResponse = jsonReader.parseJsonResponse(responseStr);
 
 	        if (jsonResponse == null) {

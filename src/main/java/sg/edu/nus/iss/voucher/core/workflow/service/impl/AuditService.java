@@ -1,7 +1,8 @@
 package sg.edu.nus.iss.voucher.core.workflow.service.impl;
 
 
-import org.json.simple.JSONObject;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,8 @@ import sg.edu.nus.iss.voucher.core.workflow.aws.service.SQSPublishingService;
 import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
 import sg.edu.nus.iss.voucher.core.workflow.enums.AuditResponseStatus;
 import sg.edu.nus.iss.voucher.core.workflow.enums.HTTPVerb;
+import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTUtility;
 import sg.edu.nus.iss.voucher.core.workflow.service.IAuditService;
-import sg.edu.nus.iss.voucher.core.workflow.utility.GeneralUtility;
-import sg.edu.nus.iss.voucher.core.workflow.utility.JSONReader;
 
 @Service
 public class AuditService implements IAuditService {
@@ -24,41 +24,27 @@ public class AuditService implements IAuditService {
 
 	@Autowired
 	AuthAPICall apiCall;
-
-	@Autowired
-	private JSONReader jsonReader;
 	
 	@Autowired
 	private SQSPublishingService sqsPublishingService;
+	
+	@Autowired
+	private JWTUtility jwtUtility;
 
 	@Override
-	public void sendMessage(AuditDTO autAuditDTO) {
+	public void sendMessage(AuditDTO autAuditDTO, String authorizationHeader) {
 
 		try {
-			String userId = GeneralUtility.makeNotNull(autAuditDTO.getUserId());
+			String jwtToken = authorizationHeader.substring(7);
+			String userName = "Invalid Username";
 
-			if (!userId.equals("")) {
-				String responseStr = apiCall.validateActiveUser(autAuditDTO.getUserId());
-				JSONObject jsonResponse = jsonReader.parseJsonResponse(responseStr);
+			if (!jwtToken.isEmpty()) {
+			   userName = Optional.ofNullable(jwtUtility.retrieveUserName(jwtToken))
+		                   .orElse("Invalid Username");
+			   autAuditDTO.setUsername(userName);
 
-				if (jsonResponse != null) {
-
-					JSONObject data = jsonReader.getDataFromResponse(jsonResponse);
-
-					if (data != null && !GeneralUtility.makeNotNull(data).isEmpty()) {
-						String userName = GeneralUtility.makeNotNull(data.get("username"));
-						if (!userName.equals("")) {
-							autAuditDTO.setUsername(userName);
-						}
-					}
-
-				}
 			}
-
-			if (autAuditDTO.getUsername().equals("")) {
-				autAuditDTO.setUsername("Invalid Username");
-			}
-			
+			autAuditDTO.setUsername(userName);
 			sqsPublishingService.sendMessage(autAuditDTO);
 
 		} catch (Exception e) {
@@ -78,7 +64,7 @@ public class AuditService implements IAuditService {
 	    return auditDTO;
 	}
 	
-	public void logAudit(AuditDTO auditDTO,int stausCode, String message) {
+	public void logAudit(AuditDTO auditDTO,int stausCode, String message, String authorizationHeader) {
 	    logger.error(message);
 	    auditDTO.setStatusCode(stausCode);
 	    if (stausCode ==200) {
@@ -88,7 +74,7 @@ public class AuditService implements IAuditService {
 	    	  auditDTO.setResponseStatus(AuditResponseStatus.FAILED);
 	    }
 	    auditDTO.setActivityDescription(message);
-	    this.sendMessage(auditDTO);
+	    this.sendMessage(auditDTO, authorizationHeader);
 	    
 	}
 
