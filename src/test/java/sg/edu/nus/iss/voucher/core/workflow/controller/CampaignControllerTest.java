@@ -173,7 +173,7 @@ public class CampaignControllerTest {
 	void testCreateCampaign() throws Exception {
 		
 		String mockResponse="{\"success\":true,\"message\":\"eleven.11@gmail.com is Active\",\"totalRecord\":1,\"data\":{\"userID\":\""+userId+"\",\"email\":\"eleven.11@gmail.com\",\"username\":\"Eleven11\",\"role\":\"MERCHANT\",\"preferences\":[\"food\",\"household\",\"clothing\"],\"active\":true,\"verified\":true}}"; 
-		Mockito.when(authAPICall.validateActiveUser(userId)).thenReturn(mockResponse);
+		Mockito.when(authAPICall.validateActiveUser(userId, "")).thenReturn(mockResponse);
 		Mockito.when(storeService.findByStoreId(store.getStoreId())).thenReturn(DTOMapper.toStoreDTO(store));
 		
 		Mockito.when(campaignService.create(Mockito.any(Campaign.class))).thenReturn(DTOMapper.toCampaignDTO(campaign1));
@@ -192,7 +192,7 @@ public class CampaignControllerTest {
 		campaign1.setUpdatedBy(userId);
 		
 		String mockResponse="{\"success\":true,\"message\":\"eleven.11@gmail.com is Active\",\"totalRecord\":1,\"data\":{\"userID\":\""+userId+"\",\"email\":\"eleven.11@gmail.com\",\"username\":\"Eleven11\",\"role\":\"MERCHANT\",\"preferences\":[\"food\",\"household\",\"clothing\"],\"active\":true,\"verified\":true}}"; 
-		Mockito.when(authAPICall.validateActiveUser(userId)).thenReturn(mockResponse);
+		Mockito.when(authAPICall.validateActiveUser(userId, "")).thenReturn(mockResponse);
 		Mockito.when(campaignService.update(Mockito.any(Campaign.class))).thenReturn(DTOMapper.toCampaignDTO(campaign1));
 		
 		mockMvc.perform(MockMvcRequestBuilders.put("/api/core/campaigns/{id}",campaign1.getCampaignId()).header("X-User-Id", userId)
@@ -212,7 +212,7 @@ public class CampaignControllerTest {
 	    campaign1.setUpdatedBy(userId);
 	    String mockResponse="{\"success\":true,\"message\":\"eleven.11@gmail.com is Active\",\"totalRecord\":1,\"data\":{\"userID\":\""+userId+"\",\"email\":\"eleven.11@gmail.com\",\"username\":\"Eleven11\",\"role\":\"MERCHANT\",\"preferences\":[\"food\",\"household\",\"clothing\"],\"active\":true,\"verified\":true}}"; 
 	   
-	    Mockito.when(authAPICall.validateActiveUser(userId)).thenReturn(mockResponse);
+	    Mockito.when(authAPICall.validateActiveUser(userId, "")).thenReturn(mockResponse);
         Mockito.when(campaignService.findById(campaign1.getCampaignId())).thenReturn(Optional.of(campaign1));
         Mockito.when(campaignService.promote(campaign1.getCampaignId(), userId))
                 .thenReturn(DTOMapper.toCampaignDTO(campaign1));

@@ -1,5 +1,6 @@
 package sg.edu.nus.iss.voucher.core.workflow.controller;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,10 +34,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jsonwebtoken.Claims;
 import sg.edu.nus.iss.voucher.core.workflow.api.connector.AuthAPICall;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreDTO;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Store;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
+import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTUtility;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.StoreService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
 import sg.edu.nus.iss.voucher.core.workflow.utility.DTOMapper;
@@ -62,7 +66,9 @@ public class StoreControllerTest {
 	@MockBean
 	private UserValidatorService userValidatorService;
 	
-
+	@Mock
+	private JWTUtility jwtUtility;
+	
 	private static List<StoreDTO> mockStores = new ArrayList<>();
 
 	private static Store store1 = new Store("1", "MUJI",
@@ -89,21 +95,20 @@ public class StoreControllerTest {
 		mockStoreMap.put(0L, mockStores);
 
 		Mockito.when(storeService.getAllActiveStoreList("", pageable)).thenReturn(mockStoreMap);
-
+		
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores").param("query", "").param("page", "0")
 				.param("size", "10")
-				.header("X-User-Id", store1.getCreatedBy())
+				.header("Authorization", "")
 				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.message").value("Successfully retrieved all active stores.")).andDo(print());
+				.andExpect(jsonPath("$.message").value("Successfully retrieved all active stores."))
+				.andDo(print());
 
 		Mockito.when(storeService.getAllActiveStoreList("SK", pageable)).thenReturn(mockStoreMap);
 
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores").param("query", "SK").param("page", "0")
 				.param("size", "10")
-				.header("X-User-Id", store1.getCreatedBy())
+				.header("Authorization", "")
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -117,7 +122,7 @@ public class StoreControllerTest {
 		Mockito.when(storeService.getAllActiveStoreList("",pageable)).thenReturn(emptyMockStoreMap);
 
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores").param("query", "").param("page", "0").param("size", "10")
-				.header("X-User-Id", store1.getCreatedBy())
+				.header("Authorization", "")
 				.contentType(MediaType.APPLICATION_JSON))
 		        .andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -141,17 +146,16 @@ public class StoreControllerTest {
 		map.put(true, "User Account is active.");
 
 		
-		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString())).thenReturn(map);
+		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString(), "")).thenReturn(map);
 		
 		
 		Mockito.when(storeService.findByStoreName(store1.getStoreName())).thenReturn(storeDTO);
 		Mockito.when(
 				storeService.createStore(Mockito.any(Store.class), (MultipartFile) Mockito.any(MultipartFile.class)))
 				.thenReturn(DTOMapper.toStoreDTO(store1));
-		
-		
+	
 		mockMvc.perform(MockMvcRequestBuilders.multipart("/api/core/stores").file(store).file(uploadFile)
-				.header("X-User-Id", store1.getCreatedBy())
+				.header("Authorization", "")
 				.contentType(MediaType.MULTIPART_FORM_DATA))
 		        .andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -162,7 +166,7 @@ public class StoreControllerTest {
 				objectMapper.writeValueAsBytes(store2));
 
 		mockMvc.perform(MockMvcRequestBuilders.multipart("/api/core/stores").file(storeFile).file(uploadFile)
-				.header("X-User-Id", store2.getCreatedBy())
+				.header("Authorization", "")
 				.contentType(MediaType.MULTIPART_FORM_DATA))
 		        .andExpect(MockMvcResultMatchers.status().isBadRequest())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -175,7 +179,7 @@ public class StoreControllerTest {
 	void testGetStoreById() throws Exception {
 		Mockito.when(storeService.findByStoreId(store1.getStoreId())).thenReturn(DTOMapper.toStoreDTO(store1));
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores/{id}", store1.getStoreId())
-				.header("X-User-Id", store1.getCreatedBy())
+				.header("Authorization", "")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(store1))).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -190,14 +194,14 @@ public class StoreControllerTest {
 		Map<Long, List<StoreDTO>> mockStoreMap = new HashMap<>();
 		mockStoreMap.put(0L, mockStores);
 		
-		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString())).thenReturn(new HashMap<>());
+		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString(), "")).thenReturn(new HashMap<>());
 
 		Mockito.when(storeService.findActiveStoreListByUserId(store1.getCreatedBy(), false, pageable))
 				.thenReturn(mockStoreMap);
 
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores/users/{userId}", store1.getCreatedBy())
 				.param("page", "0").param("size", "10")
-				.header("X-User-Id", store1.getCreatedBy())
+				.header("Authorization", "")
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -220,7 +224,7 @@ public class StoreControllerTest {
 		map.put(true, "User Account is active.");
 
 		
-		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString())).thenReturn(map);
+		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString(), "")).thenReturn(map);
 		
 		
 		Mockito.when(storeService.findByStoreId(store1.getStoreId())).thenReturn(DTOMapper.toStoreDTO(store1));
@@ -230,7 +234,7 @@ public class StoreControllerTest {
 				.thenReturn(DTOMapper.toStoreDTO(store1));
 
 		mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT,"/api/core/stores").file(store).file(uploadFile)
-				.header("X-User-Id", store1.getCreatedBy())
+				.header("Authorization", "")
 				.contentType(MediaType.MULTIPART_FORM_DATA))
 		         .andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))

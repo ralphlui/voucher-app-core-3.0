@@ -32,9 +32,9 @@ public class UserValidatorServiceTest {
 	  @Test
 	    public void testValidateActiveUser() throws ParseException {
 			String mockResponse = "{\"totalRecord\":1,\"success\":true,\"data\":{\"userID\":\"US1\",\"email\":\"test1@example.com\",\"username\":\"user1\",\"role\":\"MERCHANT\"}}";
-	        when(apiCall.validateActiveUser(anyString())).thenReturn(mockResponse);
+	        when(apiCall.validateActiveUser(anyString(), anyString())).thenReturn(mockResponse);
 
-	        HashMap<Boolean, String> result = userValidatorService.validateActiveUser("US1", "MERCHANT");
+	        HashMap<Boolean, String> result = userValidatorService.validateActiveUser("US1", "MERCHANT", "");
 	        Boolean success = false;
 	        
 	        for (Map.Entry<Boolean, String> entry : result.entrySet()) {
@@ -47,8 +47,8 @@ public class UserValidatorServiceTest {
 	        
 	        mockResponse = "{\"totalRecord\":0,\"success\":false,\"data\": null}";
 
-	        when(apiCall.validateActiveUser(anyString())).thenReturn(mockResponse);
-	        result = userValidatorService.validateActiveUser("US1", "MERCHANT");
+	        when(apiCall.validateActiveUser(anyString(), anyString())).thenReturn(mockResponse);
+	        result = userValidatorService.validateActiveUser("US1", "MERCHANT", "");
 	        
 	        for (Map.Entry<Boolean, String> entry : result.entrySet()) {
 				success = entry.getKey();
