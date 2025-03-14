@@ -28,10 +28,10 @@ import org.springframework.web.bind.annotation.RestController;
 import sg.edu.nus.iss.voucher.core.workflow.dto.*;
 import sg.edu.nus.iss.voucher.core.workflow.entity.*;
 import sg.edu.nus.iss.voucher.core.workflow.enums.*;
+import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTUtility;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.*;
 import sg.edu.nus.iss.voucher.core.workflow.strategy.impl.CampaignValidationStrategy;
 import sg.edu.nus.iss.voucher.core.workflow.utility.*;
-
 
 @RestController
 @Validated
@@ -45,78 +45,101 @@ public class CampaignController {
 
 	@Autowired
 	private CampaignValidationStrategy campaignValidationStrategy;
-	
+
 	@Autowired
 	private AuditService auditService;
-	
-	
+
+	@Autowired
+	private JWTUtility jwtUtility;
+
 	@Value("${audit.activity.type.prefix}")
 	String activityTypePrefix;
 
 	@GetMapping(value = "", produces = "application/json")
-	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllActiveCampaigns(@RequestHeader("X-User-Id") String userId,@RequestParam(defaultValue = "") String description,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-		logger.info("Calling Campaign getAllActiveCampaigns API with userId={}, description={}, page={}, size={}",userId,description, page, size);
-		
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Active Campaign List", activityTypePrefix,"/api/core/campaigns", HTTPVerb.GET);
+	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllActiveCampaigns(
+			@RequestHeader("Authorization") String authorizationHeader,
+			@RequestParam(defaultValue = "") String description, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+		logger.info("Calling Campaign getAllActiveCampaigns API with userId={}, description={}, page={}, size={}",
+				authorizationHeader, description, page, size);
+
+		String activityType = "Active Campaign List";
+		String endpoint = "/api/core/campaigns";
+		HTTPVerb httpMethod = HTTPVerb.GET;
+		String message = "";
+		String userId = "Invalid UserID";
+
+		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
 
 		try {
-			String message="";
+
+			userId = jwtUtility.retrieveUserID(authorizationHeader);
+			auditDTO.setUserId(userId);
+
 			Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
-			Map<Long, List<CampaignDTO>> resultMap = campaignService.findAllActiveCampaigns(description,pageable);
+			Map<Long, List<CampaignDTO>> resultMap = campaignService.findAllActiveCampaigns(description, pageable);
 			List<CampaignDTO> campaignDTOList = new ArrayList<>();
 
 			long totalRecord = resultMap.keySet().stream().findFirst().orElse(0L);
 
-		    campaignDTOList = resultMap.getOrDefault(totalRecord, new ArrayList<>());
+			campaignDTOList = resultMap.getOrDefault(totalRecord, new ArrayList<>());
 
 			logger.info("Total record: {}", totalRecord);
 			logger.info("CampaignDTO List: {}", campaignDTOList);
 
 			if (campaignDTOList.size() > 0) {
-				message ="Successfully retrieve all active campaigns.";
-				
-				//To add authorization header
-				auditService.logAudit(auditDTO,200,message, "");
-				return ResponseEntity.status(HttpStatus.OK).body(
-						APIResponse.success(campaignDTOList, message, totalRecord));
+				message = "Successfully retrieve all active campaigns.";
+
+				// To add authorization header
+				auditService.logAudit(auditDTO, 200, message, "");
+				return ResponseEntity.status(HttpStatus.OK)
+						.body(APIResponse.success(campaignDTOList, message, totalRecord));
 
 			} else {
 				message = "There are no available campaign list.";
 				logger.error(message);
-				//To add authorization header
-				auditService.logAudit(auditDTO,200,message, "");
-				return ResponseEntity.status(HttpStatus.OK).body(APIResponse.noList(campaignDTOList,message));
+				// To add authorization header
+				auditService.logAudit(auditDTO, 200, message, "");
+				return ResponseEntity.status(HttpStatus.OK).body(APIResponse.noList(campaignDTOList, message));
 			}
 
 		} catch (Exception ex) {
 			logger.error("An error occurred while processing getAllActiveCampaigns API.", ex);
-			String message="The attempt to retrieve all active campaigns was unsuccessful.";
+			message = "The attempt to retrieve all active campaigns was unsuccessful.";
 			auditDTO.setRemarks(ex.toString());
-			//To add authorization header
-			auditService.logAudit(auditDTO,500,message, "");		
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(APIResponse.error(message));
+			// To add authorization header
+			auditService.logAudit(auditDTO, 500, message, "");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 		}
 	}
 
-
 	@GetMapping(value = "/stores/{storeId}", produces = "application/json")
-	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllCampaignsByStoreId(@RequestHeader("X-User-Id") String userId,
-			@PathVariable("storeId") String storeId, @RequestParam(defaultValue = "") String status,@RequestParam(defaultValue = "") String description,
+	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllCampaignsByStoreId(
+			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("storeId") String storeId,
+			@RequestParam(defaultValue = "") String status, @RequestParam(defaultValue = "") String description,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-		logger.info("Calling Campaign getAllCampaignsByStoreId API with userId={}, status={}, description={}, page={}, size={}",userId,status,description, page, size);
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Campaign List by Store", activityTypePrefix,"/api/core/campaigns/stores/"+storeId, HTTPVerb.GET);
-		String message="";
+		logger.info(
+				"Calling Campaign getAllCampaignsByStoreId API with userId={}, status={}, description={}, page={}, size={}",
+				authorizationHeader, status, description, page, size);
+
+		String activityType = "Campaign List by Store";
+		String endpoint = "/api/core/campaigns/stores/" + storeId;
+		HTTPVerb httpMethod = HTTPVerb.GET;
+		String message = "";
+		String userId = "Invalid UserID";
+		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
+
 		try {
+			userId = jwtUtility.retrieveUserID(authorizationHeader);
+			auditDTO.setUserId(userId);
+
 			storeId = GeneralUtility.makeNotNull(storeId).trim();
 			if (storeId.isEmpty()) {
 				message = "Bad Request: Store ID could not be blank.";
 				logger.error(message);
-				//To add authorization header
-				auditService.logAudit(auditDTO,400,message, "");
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body(APIResponse.error(message));
+				// To add authorization header
+				auditService.logAudit(auditDTO, 400, message, "");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 			}
 
 			Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
@@ -129,13 +152,13 @@ public class CampaignController {
 					CampaignStatus campaignStatus = CampaignStatus.valueOf(status);
 					resultMap = campaignService.findByStoreIdAndStatus(storeId, campaignStatus, pageable);
 				} catch (IllegalArgumentException ex) {
-					
-					message ="Unable to retrieve all campaigns for the specified store ID. The campaign status provided is invalid.";
+
+					message = "Unable to retrieve all campaigns for the specified store ID. The campaign status provided is invalid.";
 					logger.error(message, ex);
 					auditDTO.setRemarks(ex.toString());
-					//To add authorization header
-					auditService.logAudit(auditDTO,404,message, "");
-					
+					// To add authorization header
+					auditService.logAudit(auditDTO, 404, message, "");
+
 					throw ex;
 				}
 			}
@@ -144,54 +167,64 @@ public class CampaignController {
 
 			long totalRecord = resultMap.keySet().stream().findFirst().orElse(0L);
 
-		   campaignDTOList = resultMap.getOrDefault(totalRecord, new ArrayList<>());
+			campaignDTOList = resultMap.getOrDefault(totalRecord, new ArrayList<>());
 
 			logger.info("Total record: {}", totalRecord);
 			logger.info("CampaignDTO List: {}", campaignDTOList);
 			if (campaignDTOList.size() > 0) {
-				message ="Successfully retrieve all active campaigns.";
-				//To add authorization header
-				auditService.logAudit(auditDTO,200,message, "");
+				message = "Successfully retrieve all active campaigns.";
+				// To add authorization header
+				auditService.logAudit(auditDTO, 200, message, "");
 				return ResponseEntity.status(HttpStatus.OK).body(
 						APIResponse.success(campaignDTOList, "Successfully get all active campaigns", totalRecord));
 
 			} else {
-				 message = "No campaigns found for the specified store ID: " + storeId;
+				message = "No campaigns found for the specified store ID: " + storeId;
 				logger.error(message);
-				//To add authorization header
-				auditService.logAudit(auditDTO,200,message, "");
-				return ResponseEntity.status(HttpStatus.OK).body(APIResponse.noList(campaignDTOList,message));
+				// To add authorization header
+				auditService.logAudit(auditDTO, 200, message, "");
+				return ResponseEntity.status(HttpStatus.OK).body(APIResponse.noList(campaignDTOList, message));
 			}
 
 		} catch (Exception ex) {
-			message ="The attempt to retrieve campaigns for the specified store ID was unsuccessful." ;
-			logger.error(
-					message,
-					ex);
+			message = "The attempt to retrieve campaigns for the specified store ID was unsuccessful.";
+			logger.error(message, ex);
 			auditDTO.setRemarks(ex.toString());
-			//To add authorization header
-			auditService.logAudit(auditDTO,500,message, "");
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(APIResponse.error(message));
+			// To add authorization header
+			auditService.logAudit(auditDTO, 500, message, "");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 		}
 	}
 
 	@GetMapping(value = "/users/{userId}", produces = "application/json")
-	public ResponseEntity<APIResponse<List<CampaignDTO>>> getCampaignsByUserId(@RequestHeader("X-User-Id") String xUserId,@PathVariable("userId") String userId,
-			@RequestParam(defaultValue = "") String description,@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+	public ResponseEntity<APIResponse<List<CampaignDTO>>> getCampaignsByUserId(
+			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("userId") String userId,
+			@RequestParam(defaultValue = "") String description, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
 		long totalRecord = 0;
-		logger.info("Calling Campaign getAllCampaignsByEmail API with userId={}, description={}, page={}, size={}",xUserId,description, page, size);
+		logger.info("Calling Campaign getAllCampaignsByEmail API with userId={}, description={}, page={}, size={}",
+				authorizationHeader, description, page, size);
 
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Campaign List by User", activityTypePrefix,"/api/core/campaigns/users/"+userId, HTTPVerb.GET);
-		String message="";
+		String activityType = "Campaign List by User";
+		String endpoint = "/api/core/campaigns/users/" + userId;
+		HTTPVerb httpMethod = HTTPVerb.GET;
+		String message = "";
+		String xUserId = "Invalid UserID";
+		AuditDTO auditDTO = auditService.createAuditDTO(xUserId, activityType, activityTypePrefix, endpoint,
+				httpMethod);
+
 		try {
-			
+
+			xUserId = jwtUtility.retrieveUserID(authorizationHeader);
+			auditDTO.setUserId(userId);
+
 			userId = GeneralUtility.makeNotNull(userId).trim();
 
 			if (!userId.equals("")) {
 				Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
 
-				Map<Long, List<CampaignDTO>> resultMap = campaignService.findAllCampaignsByUserId(userId,description, pageable);
+				Map<Long, List<CampaignDTO>> resultMap = campaignService.findAllCampaignsByUserId(userId, description,
+						pageable);
 
 				List<CampaignDTO> campaignDTOList = new ArrayList<CampaignDTO>();
 
@@ -205,25 +238,24 @@ public class CampaignController {
 				}
 
 				if (campaignDTOList.size() > 0) {
-					message="Successfully retrieved all campaigns for the specified user.";
-					//To add authorization header
-					auditService.logAudit(auditDTO,200,message, "");
-					return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(campaignDTOList,
-							message, totalRecord));
+					message = "Successfully retrieved all campaigns for the specified user.";
+					// To add authorization header
+					auditService.logAudit(auditDTO, 200, message, "");
+					return ResponseEntity.status(HttpStatus.OK)
+							.body(APIResponse.success(campaignDTOList, message, totalRecord));
 
 				} else {
 					message = "No campaigns were found for the specified user ID: " + userId;
-					//To add authorization header
-					auditService.logAudit(auditDTO,200,message, "");
-					return ResponseEntity.status(HttpStatus.OK)
-							.body(APIResponse.noList(campaignDTOList,message));
+					// To add authorization header
+					auditService.logAudit(auditDTO, 200, message, "");
+					return ResponseEntity.status(HttpStatus.OK).body(APIResponse.noList(campaignDTOList, message));
 				}
 			} else {
 				message = "Bad Request:Email could not be blank.";
 				logger.error(message);
-				//To add authorization header
-				auditService.logAudit(auditDTO,400,message, "");
-				
+				// To add authorization header
+				auditService.logAudit(auditDTO, 400, message, "");
+
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 						.body(APIResponse.error("Bad Request:UserId could not be blank."));
 			}
@@ -232,20 +264,27 @@ public class CampaignController {
 			message = "The attempt to retrieve campaigns for the specified user was unsuccessful.";
 			logger.error(message);
 			auditDTO.setRemarks(ex.toString());
-			//To add authorization header
-			auditService.logAudit(auditDTO,500,message, "");
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(APIResponse.error(message));
+			// To add authorization header
+			auditService.logAudit(auditDTO, 500, message, "");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 		}
 	}
 
 	@GetMapping(value = "/{id}", produces = "application/json")
-	public ResponseEntity<APIResponse<CampaignDTO>> getByCampaignId(@RequestHeader("X-User-Id") String userId,@PathVariable("id") String id) {
-	
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Find Campaign by Id", activityTypePrefix,"/api/core/campaigns/"+id, HTTPVerb.GET);
-		String message="";
+	public ResponseEntity<APIResponse<CampaignDTO>> getByCampaignId(
+			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
+
+		logger.info("Calling get Campaign API...");
+		String activityType = "Search Campaign by Id";
+		String endpoint = "/api/core/campaigns/" + id;
+		HTTPVerb httpMethod = HTTPVerb.GET;
+		String message = "";
+		String userId = "Invalid UserID";
+		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
+
 		try {
-			logger.info("Calling get Campaign API...");
+			userId = jwtUtility.retrieveUserID(authorizationHeader);
+			auditDTO.setUserId(userId);
 
 			String campaignId = GeneralUtility.makeNotNull(id).trim();
 
@@ -254,202 +293,211 @@ public class CampaignController {
 				CampaignDTO campaignDTO = campaignService.findByCampaignId(campaignId);
 
 				if (campaignDTO.getCampaignId().equals(campaignId)) {
-					message =  "Successfully retrieved campaign with ID: " + campaignId;
-					
-					//To add authorization header
-					auditService.logAudit(auditDTO,200,message, "");
-					return ResponseEntity.status(HttpStatus.OK)
-							.body(APIResponse.success(campaignDTO,message));
+					message = "Successfully retrieved campaign with ID: " + campaignId;
+
+					// To add authorization header
+					auditService.logAudit(auditDTO, 200, message, "");
+					return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(campaignDTO, message));
 				} else {
 					message = "Campaign not found for the specified campaign ID: " + campaignId;
-					
-					//To add authorization header
-					auditService.logAudit(auditDTO,404,message, "");
-					return ResponseEntity.status(HttpStatus.NOT_FOUND)
-							.body(APIResponse.error(message));
+
+					// To add authorization header
+					auditService.logAudit(auditDTO, 404, message, "");
+					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error(message));
 
 				}
 
 			} else {
 				message = "Bad Request:CampaignId could not be blank.";
 				logger.error(message);
-				//To add authorization header
-				auditService.logAudit(auditDTO,400,message, "");
-				
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body(APIResponse.error(message));
+				// To add authorization header
+				auditService.logAudit(auditDTO, 400, message, "");
+
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 			}
 
 		} catch (Exception ex) {
 			message = "The attempt retrieve campaing for specified campaign was unsuccessful.";
 			logger.error(message);
 			auditDTO.setRemarks(ex.toString());
-			//To add authorization header
-			auditService.logAudit(auditDTO,500,message, "");
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(APIResponse.error(message));
+			// To add authorization header
+			auditService.logAudit(auditDTO, 500, message, "");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 		}
 
 	}
 
 	@PostMapping(value = "", produces = "application/json")
-	public ResponseEntity<APIResponse<CampaignDTO>> createCampaign(@RequestHeader("X-User-Id") String userId,@RequestBody Campaign campaign) {
-		
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Create Campaign", activityTypePrefix,"/api/core/campaigns", HTTPVerb.POST);
-		String message="";
-		
+	public ResponseEntity<APIResponse<CampaignDTO>> createCampaign(
+			@RequestHeader("Authorization") String authorizationHeader, @RequestBody Campaign campaign) {
+
+		logger.info("Calling Campaign create API...");
+
+		String activityType = "Create Campaign";
+		String endpoint = "/api/core/campaigns";
+		HTTPVerb httpMethod = HTTPVerb.POST;
+		String message = "";
+		String userId = "Invalid UserID";
+		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
+
 		try {
-			logger.info("Calling Campaign create API...");
-			
-			//To add authorization header
+			userId = jwtUtility.retrieveUserID(authorizationHeader);
+			auditDTO.setUserId(userId);
+
+			// To add authorization header
 			ValidationResult validationResult = campaignValidationStrategy.validateCreation(campaign, null, "");
 			if (validationResult.isValid()) {
 
 				CampaignDTO campaignDTO = campaignService.create(campaign);
 				if (campaignDTO != null && !campaignDTO.getCampaignId().isEmpty()) {
 					message = "Campaign has been created successfully.";
-					//To add authorization header
-					auditService.logAudit(auditDTO,200,message, "");
-					return ResponseEntity.status(HttpStatus.OK)
-							.body(APIResponse.success(campaignDTO,message));
+					// To add authorization header
+					auditService.logAudit(auditDTO, 200, message, "");
+					return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(campaignDTO, message));
 				} else {
-					message ="Campaign creation process was unsuccessful.";
-					//To add authorization header
-					auditService.logAudit(auditDTO,500,message, "");
+					message = "Campaign creation process was unsuccessful.";
+					// To add authorization header
+					auditService.logAudit(auditDTO, 500, message, "");
 					logger.error(message);
-					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-							.body(APIResponse.error(message));
+					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 				}
 
 			} else {
 				message = validationResult.getMessage();
 				logger.error(message);
-				//To add authorization header
-				auditService.logAudit(auditDTO,400,message, "");
+				// To add authorization header
+				auditService.logAudit(auditDTO, 400, message, "");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 			}
 
 		} catch (Exception ex) {
-			message ="An error has occurred while processing the Create Campaign API request.";
+			message = "An error has occurred while processing the Create Campaign API request.";
 			auditDTO.setRemarks(ex.toString());
-			
+
 			logger.error(message, ex);
-			//To add authorization header
-			auditService.logAudit(auditDTO,500,message, "");
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(APIResponse.error(message));
+			// To add authorization header
+			auditService.logAudit(auditDTO, 500, message, "");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 		}
 	}
 
 	@PutMapping(value = "/{id}", produces = "application/json")
-	public ResponseEntity<APIResponse<CampaignDTO>> updateCampaign(@RequestHeader("X-User-Id") String userId,@PathVariable("id") String id,
+	public ResponseEntity<APIResponse<CampaignDTO>> updateCampaign(
+			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id,
 			@RequestBody Campaign campaign) {
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Update Campaign", activityTypePrefix,"/api/core/campaigns/"+id, HTTPVerb.PUT);
-		String message="";
-		
+
+		String activityType = "Update Campaign";
+		String endpoint = "/api/core/campaigns/" + id;
+		HTTPVerb httpMethod = HTTPVerb.PUT;
+		String message = "";
+		String userId = "Invalid UserID";
+		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
+
 		try {
+			userId = jwtUtility.retrieveUserID(authorizationHeader);
+			auditDTO.setUserId(userId);
+
 			logger.info("Calling Campaign update API...");
-			
+
 			String campaignId = GeneralUtility.makeNotNull(id).trim();
 
 			if (!campaignId.equals("")) {
 				campaign.setCampaignId(campaignId);
-				//To add authorization header
+				// To add authorization header
 				ValidationResult validationResult = campaignValidationStrategy.validateUpdating(campaign, null, "");
 				if (validationResult.isValid()) {
 					CampaignDTO campaignDTO = campaignService.update(campaign);
 					if (campaignDTO != null && !campaignDTO.getCampaignId().isEmpty()) {
-						message ="Campaign has been updated successfully.";
-						//To add authorization header
-						auditService.logAudit(auditDTO,200,message, "");
-						return ResponseEntity.status(HttpStatus.OK)
-								.body(APIResponse.success(campaignDTO, message));
+						message = "Campaign has been updated successfully.";
+						// To add authorization header
+						auditService.logAudit(auditDTO, 200, message, "");
+						return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(campaignDTO, message));
 					} else {
 						logger.error("Calling Campaign create API failed...");
-						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-								APIResponse.error("The update for the campaign has failed. Please check the provided campaign ID:" + campaign.getCampaignId()));
+						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+								.body(APIResponse.error(
+										"The update for the campaign has failed. Please check the provided campaign ID:"
+												+ campaign.getCampaignId()));
 					}
 
 				} else {
 					message = validationResult.getMessage();
 					logger.error(message);
-					//To add authorization header
-					auditService.logAudit(auditDTO,404,message, "");
+					// To add authorization header
+					auditService.logAudit(auditDTO, 404, message, "");
 					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error(message));
 				}
 			} else {
-				message ="Bad Request:Campaign ID could not be blank.";
+				message = "Bad Request:Campaign ID could not be blank.";
 				logger.error(message);
-				//To add authorization header
-				auditService.logAudit(auditDTO,400,message, "");
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body(APIResponse.error(message));
+				// To add authorization header
+				auditService.logAudit(auditDTO, 400, message, "");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 			}
 
 		} catch (Exception ex) {
-			message ="An error has occurred while processing the Update Campaign API request.";
+			message = "An error has occurred while processing the Update Campaign API request.";
 			auditDTO.setRemarks(ex.toString());
-			
+
 			logger.info(message);
-			//To add authorization header
-			auditService.logAudit(auditDTO,500,message, "");
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(APIResponse.error(message));
+			// To add authorization header
+			auditService.logAudit(auditDTO, 500, message, "");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 		}
 	}
 
 	@PatchMapping(value = "/{campaignId}/users/{userId}/promote", produces = "application/json")
-	public ResponseEntity<APIResponse<CampaignDTO>> promoteCampaign(@RequestHeader("X-User-Id") String xUserId,@PathVariable("campaignId") String campaignId,
+	public ResponseEntity<APIResponse<CampaignDTO>> promoteCampaign(
+			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("campaignId") String campaignId,
 			@PathVariable("userId") String userId) {
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Promote Campaign", activityTypePrefix,"/api/core/campaigns/"+campaignId+"/users/"+userId+"/promote", HTTPVerb.PATCH);
-		String message="";
-		
+		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Promote Campaign", activityTypePrefix,
+				"/api/core/campaigns/" + campaignId + "/users/" + userId + "/promote", HTTPVerb.PATCH);
+		String message = "";
+
 		try {
 			logger.info("Calling Campaign Promote API...");
 
 			ValidationResult validationResult = campaignValidationStrategy.validateObject(campaignId);
 			if (!validationResult.isValid()) {
-				 message = validationResult.getMessage();
+				message = validationResult.getMessage();
 				logger.error(message);
-				//To add authorization header
-				auditService.logAudit(auditDTO,400,message, "");
+				// To add authorization header
+				auditService.logAudit(auditDTO, 400, message, "");
 				return ResponseEntity.status(validationResult.getStatus()).body(APIResponse.error(message));
 			}
-			
-			//To add authorization header
-			validationResult= campaignValidationStrategy.validateUser(userId, "");
+
+			// To add authorization header
+			validationResult = campaignValidationStrategy.validateUser(userId, "");
 			if (!validationResult.isValid()) {
-				 message = validationResult.getMessage();
+				message = validationResult.getMessage();
 				logger.error(message);
-				//To add authorization header
-				auditService.logAudit(auditDTO,400,message, "");
+				// To add authorization header
+				auditService.logAudit(auditDTO, 400, message, "");
 				return ResponseEntity.status(validationResult.getStatus()).body(APIResponse.error(message));
 			}
-			
-			CampaignDTO campaignDTO = campaignService.promote(campaignId,userId);
-			if (campaignDTO != null && campaignDTO.getCampaignId()!=null) {
-				message ="Campaign has been promoted successfully.";
-				//To add authorization header
-				auditService.logAudit(auditDTO,200,message, "");
-				return ResponseEntity.status(HttpStatus.OK)
-						.body(APIResponse.success(campaignDTO, message));
+
+			CampaignDTO campaignDTO = campaignService.promote(campaignId, userId);
+			if (campaignDTO != null && campaignDTO.getCampaignId() != null) {
+				message = "Campaign has been promoted successfully.";
+				// To add authorization header
+				auditService.logAudit(auditDTO, 200, message, "");
+				return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(campaignDTO, message));
 			} else {
 				message = "Campaign promotion process has encountered an error and was unsuccessful.";
 				logger.error(message);
-				//To add authorization header
-				auditService.logAudit(auditDTO,500,message, "");
+				// To add authorization header
+				auditService.logAudit(auditDTO, 500, message, "");
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 			}
 
 		} catch (Exception ex) {
-			message ="An error has occurred while processing the Promote Campaign API request..";
+			message = "An error has occurred while processing the Promote Campaign API request..";
 			logger.error(message);
 			auditDTO.setRemarks(ex.toString());
-			//To add authorization header
-			auditService.logAudit(auditDTO,500,message, "");
+			// To add authorization header
+			auditService.logAudit(auditDTO, 500, message, "");
 			logger.error("", ex);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(APIResponse.error(message));
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 		}
 	}
 
