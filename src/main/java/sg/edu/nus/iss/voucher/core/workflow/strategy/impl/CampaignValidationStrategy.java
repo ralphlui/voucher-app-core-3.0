@@ -34,7 +34,7 @@ public class CampaignValidationStrategy implements IAPIHelperValidationStrategy<
 	private UserValidatorService userValidatorService;
 
 	@Override
-	public ValidationResult validateCreation(Campaign campaign, MultipartFile val) {
+	public ValidationResult validateCreation(Campaign campaign, MultipartFile val, String authorizationHeader) {
 		ValidationResult validationResult = new ValidationResult();
 		if (campaign.getDescription() == null || campaign.getDescription().isEmpty()) {
 			validationResult.setMessage("Description cannot be empty.");
@@ -82,7 +82,7 @@ public class CampaignValidationStrategy implements IAPIHelperValidationStrategy<
 		}
 
 		String userId = campaign.getCreatedBy();
-		validationResult = validateUser(userId);
+		validationResult = validateUser(userId, authorizationHeader);
 		if (!validationResult.isValid()) {
 			return validationResult;
 		}
@@ -93,7 +93,7 @@ public class CampaignValidationStrategy implements IAPIHelperValidationStrategy<
 	}
 
 	@Override
-	public ValidationResult validateUpdating(Campaign campaign, MultipartFile val) {
+	public ValidationResult validateUpdating(Campaign campaign, MultipartFile val, String authorizationHeader) {
 		ValidationResult validationResult = new ValidationResult();
 		String campaignId = GeneralUtility.makeNotNull(campaign.getCampaignId()).trim();
 		if (campaignId == null || campaignId.isEmpty()) {
@@ -105,7 +105,7 @@ public class CampaignValidationStrategy implements IAPIHelperValidationStrategy<
 		}
 
 		String userId = campaign.getUpdatedBy();
-		validationResult = validateUser(userId);
+		validationResult = validateUser(userId, authorizationHeader);
 		if (!validationResult.isValid()) {
 			return validationResult;
 		}
@@ -176,7 +176,7 @@ public class CampaignValidationStrategy implements IAPIHelperValidationStrategy<
 		return validationResult;
 	}
 
-	public ValidationResult validateUser(String userId) {
+	public ValidationResult validateUser(String userId, String authorizationHeader) {
 		ValidationResult validationResult = new ValidationResult();
 
 		if (userId == null || userId.isEmpty()) {
@@ -185,8 +185,8 @@ public class CampaignValidationStrategy implements IAPIHelperValidationStrategy<
 			validationResult.setValid(false);
 			return validationResult;
 		}
-
-		HashMap<Boolean, String> userMap = userValidatorService.validateActiveUser(userId, "MERCHANT");
+ 
+		HashMap<Boolean, String> userMap = userValidatorService.validateActiveUser(userId, "MERCHANT", authorizationHeader);
 
 		for (Map.Entry<Boolean, String> entry : userMap.entrySet()) {
 
@@ -203,6 +203,12 @@ public class CampaignValidationStrategy implements IAPIHelperValidationStrategy<
 
 		return validationResult;
 
+	}
+
+	@Override
+	public ValidationResult validateObject(String data, String header) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

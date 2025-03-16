@@ -28,7 +28,7 @@ public class AuthAPICall {
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthAPICall.class);
 	
-	public String validateActiveUser(String userId) {
+	public String validateActiveUser(String userId, String authorizationHeader) {
 	    String responseStr = "";
 	    
 	    CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -43,7 +43,7 @@ public class AuthAPICall {
 	                .build();
 	        httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 	        HttpGet request = new HttpGet(url);
-	        request.setHeader("X-User-Id", userId);
+	        request.setHeader("Authorization", authorizationHeader);
 	        CloseableHttpResponse httpResponse = httpClient.execute(request);
 	        try {
 	            byte[] responseByteArray = EntityUtils.toByteArray(httpResponse.getEntity());
@@ -67,7 +67,7 @@ public class AuthAPICall {
 	    return responseStr;
 	}
 	
-	public String validateToken(String token, String userId) {
+	public String validateToken(String token) {
 		String responseStr = "";
 
 		CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -78,8 +78,7 @@ public class AuthAPICall {
 					.setSocketTimeout(30000).build();
 			httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 			HttpGet request = new HttpGet(url);
-			request.setHeader("X-User-Id", userId);
-			request.setHeader("Authorization", "Bearer " + token);
+			request.setHeader("Authorization", token);
 			CloseableHttpResponse httpResponse = httpClient.execute(request);
 			try {
 				byte[] responseByteArray = EntityUtils.toByteArray(httpResponse.getEntity());

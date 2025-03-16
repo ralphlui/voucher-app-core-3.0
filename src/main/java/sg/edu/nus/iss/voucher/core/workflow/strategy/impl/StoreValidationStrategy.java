@@ -26,7 +26,7 @@ public class StoreValidationStrategy implements IAPIHelperValidationStrategy<Sto
 	private UserValidatorService userValidatorService;
 
 	@Override
-	public ValidationResult validateCreation(Store store, MultipartFile val) {
+	public ValidationResult validateCreation(Store store, MultipartFile val, String authorizationHeader) {
 
 		ValidationResult validationResult = new ValidationResult();
 		String userId = GeneralUtility.makeNotNull(store.getCreatedBy());
@@ -38,7 +38,7 @@ public class StoreValidationStrategy implements IAPIHelperValidationStrategy<Sto
 			return validationResult;
 		}
 
-		ValidationResult validationObjResult = validateObject(userId);
+		ValidationResult validationObjResult = validateObject(userId, authorizationHeader);
 		if (!validationObjResult.isValid()) {
 			return validationObjResult;
 		}
@@ -74,10 +74,10 @@ public class StoreValidationStrategy implements IAPIHelperValidationStrategy<Sto
 	}
 	
 	@Override
-	public ValidationResult validateObject(String userId) {
+	public ValidationResult validateObject(String userId, String authorizationHeader) {
 
 		ValidationResult validationResult = new ValidationResult();
-		HashMap<Boolean, String> response = userValidatorService.validateActiveUser(userId, "MERCHANT");
+		HashMap<Boolean, String> response = userValidatorService.validateActiveUser(userId, "MERCHANT", authorizationHeader);
 		Boolean success = false;
 		String message = "";
 		for (Map.Entry<Boolean, String> entry : response.entrySet()) {
@@ -95,7 +95,7 @@ public class StoreValidationStrategy implements IAPIHelperValidationStrategy<Sto
 
 
 	@Override
-	public ValidationResult validateUpdating(Store store, MultipartFile val) {
+	public ValidationResult validateUpdating(Store store, MultipartFile val, String authorizationHeader) {
 		ValidationResult validationResult = new ValidationResult();
 		// Validate store ID
 		String storeId = GeneralUtility.makeNotNull(store.getStoreId());
@@ -125,13 +125,19 @@ public class StoreValidationStrategy implements IAPIHelperValidationStrategy<Sto
 			return validationResult;
 		}
 
-		ValidationResult validationObjResult = validateObject(userId);
+		ValidationResult validationObjResult = validateObject(userId, authorizationHeader);
 		if (!validationObjResult.isValid()) {
 			return validationObjResult;
 		}
 
 		validationResult.setValid(true);
 		return validationResult;
+	}
+
+	@Override
+	public ValidationResult validateObject(String data) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

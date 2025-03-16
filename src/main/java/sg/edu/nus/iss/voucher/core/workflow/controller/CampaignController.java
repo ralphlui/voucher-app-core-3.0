@@ -76,14 +76,16 @@ public class CampaignController {
 			if (campaignDTOList.size() > 0) {
 				message ="Successfully retrieve all active campaigns.";
 				
-				auditService.logAudit(auditDTO,200,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,200,message, "");
 				return ResponseEntity.status(HttpStatus.OK).body(
 						APIResponse.success(campaignDTOList, message, totalRecord));
 
 			} else {
 				message = "There are no available campaign list.";
 				logger.error(message);
-				auditService.logAudit(auditDTO,200,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,200,message, "");
 				return ResponseEntity.status(HttpStatus.OK).body(APIResponse.noList(campaignDTOList,message));
 			}
 
@@ -91,7 +93,8 @@ public class CampaignController {
 			logger.error("An error occurred while processing getAllActiveCampaigns API.", ex);
 			String message="The attempt to retrieve all active campaigns was unsuccessful.";
 			auditDTO.setRemarks(ex.toString());
-			auditService.logAudit(auditDTO,500,message);		
+			//To add authorization header
+			auditService.logAudit(auditDTO,500,message, "");		
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(APIResponse.error(message));
 		}
@@ -110,7 +113,8 @@ public class CampaignController {
 			if (storeId.isEmpty()) {
 				message = "Bad Request: Store ID could not be blank.";
 				logger.error(message);
-				auditService.logAudit(auditDTO,400,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,400,message, "");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 						.body(APIResponse.error(message));
 			}
@@ -129,7 +133,8 @@ public class CampaignController {
 					message ="Unable to retrieve all campaigns for the specified store ID. The campaign status provided is invalid.";
 					logger.error(message, ex);
 					auditDTO.setRemarks(ex.toString());
-					auditService.logAudit(auditDTO,404,message);
+					//To add authorization header
+					auditService.logAudit(auditDTO,404,message, "");
 					
 					throw ex;
 				}
@@ -145,14 +150,16 @@ public class CampaignController {
 			logger.info("CampaignDTO List: {}", campaignDTOList);
 			if (campaignDTOList.size() > 0) {
 				message ="Successfully retrieve all active campaigns.";
-				auditService.logAudit(auditDTO,200,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,200,message, "");
 				return ResponseEntity.status(HttpStatus.OK).body(
 						APIResponse.success(campaignDTOList, "Successfully get all active campaigns", totalRecord));
 
 			} else {
 				 message = "No campaigns found for the specified store ID: " + storeId;
 				logger.error(message);
-				auditService.logAudit(auditDTO,200,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,200,message, "");
 				return ResponseEntity.status(HttpStatus.OK).body(APIResponse.noList(campaignDTOList,message));
 			}
 
@@ -162,7 +169,8 @@ public class CampaignController {
 					message,
 					ex);
 			auditDTO.setRemarks(ex.toString());
-			auditService.logAudit(auditDTO,500,message);
+			//To add authorization header
+			auditService.logAudit(auditDTO,500,message, "");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(APIResponse.error(message));
 		}
@@ -198,20 +206,23 @@ public class CampaignController {
 
 				if (campaignDTOList.size() > 0) {
 					message="Successfully retrieved all campaigns for the specified user.";
-					auditService.logAudit(auditDTO,200,message);
+					//To add authorization header
+					auditService.logAudit(auditDTO,200,message, "");
 					return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(campaignDTOList,
 							message, totalRecord));
 
 				} else {
 					message = "No campaigns were found for the specified user ID: " + userId;
-					auditService.logAudit(auditDTO,200,message);
+					//To add authorization header
+					auditService.logAudit(auditDTO,200,message, "");
 					return ResponseEntity.status(HttpStatus.OK)
 							.body(APIResponse.noList(campaignDTOList,message));
 				}
 			} else {
 				message = "Bad Request:Email could not be blank.";
 				logger.error(message);
-				auditService.logAudit(auditDTO,400,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,400,message, "");
 				
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 						.body(APIResponse.error("Bad Request:UserId could not be blank."));
@@ -221,7 +232,8 @@ public class CampaignController {
 			message = "The attempt to retrieve campaigns for the specified user was unsuccessful.";
 			logger.error(message);
 			auditDTO.setRemarks(ex.toString());
-			auditService.logAudit(auditDTO,500,message);
+			//To add authorization header
+			auditService.logAudit(auditDTO,500,message, "");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(APIResponse.error(message));
 		}
@@ -244,13 +256,15 @@ public class CampaignController {
 				if (campaignDTO.getCampaignId().equals(campaignId)) {
 					message =  "Successfully retrieved campaign with ID: " + campaignId;
 					
-					auditService.logAudit(auditDTO,200,message);
+					//To add authorization header
+					auditService.logAudit(auditDTO,200,message, "");
 					return ResponseEntity.status(HttpStatus.OK)
 							.body(APIResponse.success(campaignDTO,message));
 				} else {
 					message = "Campaign not found for the specified campaign ID: " + campaignId;
 					
-					auditService.logAudit(auditDTO,404,message);
+					//To add authorization header
+					auditService.logAudit(auditDTO,404,message, "");
 					return ResponseEntity.status(HttpStatus.NOT_FOUND)
 							.body(APIResponse.error(message));
 
@@ -259,7 +273,8 @@ public class CampaignController {
 			} else {
 				message = "Bad Request:CampaignId could not be blank.";
 				logger.error(message);
-				auditService.logAudit(auditDTO,400,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,400,message, "");
 				
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 						.body(APIResponse.error(message));
@@ -269,7 +284,8 @@ public class CampaignController {
 			message = "The attempt retrieve campaing for specified campaign was unsuccessful.";
 			logger.error(message);
 			auditDTO.setRemarks(ex.toString());
-			auditService.logAudit(auditDTO,500,message);
+			//To add authorization header
+			auditService.logAudit(auditDTO,500,message, "");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(APIResponse.error(message));
 		}
@@ -285,18 +301,21 @@ public class CampaignController {
 		try {
 			logger.info("Calling Campaign create API...");
 			
-			ValidationResult validationResult = campaignValidationStrategy.validateCreation(campaign, null);
+			//To add authorization header
+			ValidationResult validationResult = campaignValidationStrategy.validateCreation(campaign, null, "");
 			if (validationResult.isValid()) {
 
 				CampaignDTO campaignDTO = campaignService.create(campaign);
 				if (campaignDTO != null && !campaignDTO.getCampaignId().isEmpty()) {
 					message = "Campaign has been created successfully.";
-					auditService.logAudit(auditDTO,200,message);
+					//To add authorization header
+					auditService.logAudit(auditDTO,200,message, "");
 					return ResponseEntity.status(HttpStatus.OK)
 							.body(APIResponse.success(campaignDTO,message));
 				} else {
 					message ="Campaign creation process was unsuccessful.";
-					auditService.logAudit(auditDTO,500,message);
+					//To add authorization header
+					auditService.logAudit(auditDTO,500,message, "");
 					logger.error(message);
 					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 							.body(APIResponse.error(message));
@@ -305,7 +324,8 @@ public class CampaignController {
 			} else {
 				message = validationResult.getMessage();
 				logger.error(message);
-				auditService.logAudit(auditDTO,400,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,400,message, "");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 			}
 
@@ -314,7 +334,8 @@ public class CampaignController {
 			auditDTO.setRemarks(ex.toString());
 			
 			logger.error(message, ex);
-			auditService.logAudit(auditDTO,500,message);
+			//To add authorization header
+			auditService.logAudit(auditDTO,500,message, "");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(APIResponse.error(message));
 		}
@@ -333,12 +354,14 @@ public class CampaignController {
 
 			if (!campaignId.equals("")) {
 				campaign.setCampaignId(campaignId);
-				ValidationResult validationResult = campaignValidationStrategy.validateUpdating(campaign, null);
+				//To add authorization header
+				ValidationResult validationResult = campaignValidationStrategy.validateUpdating(campaign, null, "");
 				if (validationResult.isValid()) {
 					CampaignDTO campaignDTO = campaignService.update(campaign);
 					if (campaignDTO != null && !campaignDTO.getCampaignId().isEmpty()) {
 						message ="Campaign has been updated successfully.";
-						auditService.logAudit(auditDTO,200,message);
+						//To add authorization header
+						auditService.logAudit(auditDTO,200,message, "");
 						return ResponseEntity.status(HttpStatus.OK)
 								.body(APIResponse.success(campaignDTO, message));
 					} else {
@@ -350,13 +373,15 @@ public class CampaignController {
 				} else {
 					message = validationResult.getMessage();
 					logger.error(message);
-					auditService.logAudit(auditDTO,404,message);
+					//To add authorization header
+					auditService.logAudit(auditDTO,404,message, "");
 					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error(message));
 				}
 			} else {
 				message ="Bad Request:Campaign ID could not be blank.";
 				logger.error(message);
-				auditService.logAudit(auditDTO,400,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,400,message, "");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 						.body(APIResponse.error(message));
 			}
@@ -366,7 +391,8 @@ public class CampaignController {
 			auditDTO.setRemarks(ex.toString());
 			
 			logger.info(message);
-			auditService.logAudit(auditDTO,500,message);
+			//To add authorization header
+			auditService.logAudit(auditDTO,500,message, "");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(APIResponse.error(message));
 		}
@@ -385,28 +411,33 @@ public class CampaignController {
 			if (!validationResult.isValid()) {
 				 message = validationResult.getMessage();
 				logger.error(message);
-				auditService.logAudit(auditDTO,400,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,400,message, "");
 				return ResponseEntity.status(validationResult.getStatus()).body(APIResponse.error(message));
 			}
 			
-			validationResult= campaignValidationStrategy.validateUser(userId);
+			//To add authorization header
+			validationResult= campaignValidationStrategy.validateUser(userId, "");
 			if (!validationResult.isValid()) {
 				 message = validationResult.getMessage();
 				logger.error(message);
-				auditService.logAudit(auditDTO,400,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,400,message, "");
 				return ResponseEntity.status(validationResult.getStatus()).body(APIResponse.error(message));
 			}
 			
 			CampaignDTO campaignDTO = campaignService.promote(campaignId,userId);
 			if (campaignDTO != null && campaignDTO.getCampaignId()!=null) {
 				message ="Campaign has been promoted successfully.";
-				auditService.logAudit(auditDTO,200,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,200,message, "");
 				return ResponseEntity.status(HttpStatus.OK)
 						.body(APIResponse.success(campaignDTO, message));
 			} else {
 				message = "Campaign promotion process has encountered an error and was unsuccessful.";
 				logger.error(message);
-				auditService.logAudit(auditDTO,500,message);
+				//To add authorization header
+				auditService.logAudit(auditDTO,500,message, "");
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 			}
 
@@ -414,7 +445,8 @@ public class CampaignController {
 			message ="An error has occurred while processing the Promote Campaign API request..";
 			logger.error(message);
 			auditDTO.setRemarks(ex.toString());
-			auditService.logAudit(auditDTO,500,message);
+			//To add authorization header
+			auditService.logAudit(auditDTO,500,message, "");
 			logger.error("", ex);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(APIResponse.error(message));
