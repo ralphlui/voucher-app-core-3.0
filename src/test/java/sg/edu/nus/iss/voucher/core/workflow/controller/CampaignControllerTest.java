@@ -228,7 +228,7 @@ public class CampaignControllerTest {
         when(jsonReader.getMessageFromResponse(mockJsonResponse)).thenReturn(mockMessage);
 		
 		Mockito.when(campaignService.findById(campaign1.getCampaignId())).thenReturn(Optional.of(campaign1));
-		Mockito.when(campaignService.promote(campaign1.getCampaignId(), userId))
+		Mockito.when(campaignService.promote(campaign1.getCampaignId(), userId,authorizationHeader))
 				.thenReturn(DTOMapper.toCampaignDTO(campaign1));
 
 		mockMvc.perform(MockMvcRequestBuilders

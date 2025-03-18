@@ -55,11 +55,12 @@ public class SNSPublishingServiceTest {
 	@Test
 	public void testSendNotification() {
 		// Mock the response of the SNS publish
+	    String authorizationHeader = "Bearer mock.jwt.token";
 		PublishResult publishResult = new PublishResult();
 		publishResult.setMessageId("12345");
 		when(amazonSNSClient.publish(any(PublishRequest.class))).thenReturn(publishResult);
 
-		messagePublishService.sendNotification(campaign);
+		messagePublishService.sendNotification(campaign,authorizationHeader);
 
 		verify(amazonSNSClient, times(1)).publish(any(PublishRequest.class));
 

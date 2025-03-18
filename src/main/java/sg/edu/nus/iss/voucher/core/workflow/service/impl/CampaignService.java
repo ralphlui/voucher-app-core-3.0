@@ -217,7 +217,7 @@ public class CampaignService implements ICampaignService {
 	}
 
 	@Override
-	public CampaignDTO promote(String campaignId,String userId) {
+	public CampaignDTO promote(String campaignId,String userId,String authorizationHeader) {
 		CampaignDTO campaignDTO = new CampaignDTO();
 		try {
 
@@ -240,7 +240,7 @@ public class CampaignService implements ICampaignService {
 						logger.info("Promotted successfully...");
 						campaignDTO = DTOMapper.toCampaignDTO(promottedCampaign);
 						
-						messagePublishService.sendNotification(promottedCampaign);
+						messagePublishService.sendNotification(promottedCampaign,authorizationHeader);
 						logger.info("Feed generated successfully...");
 					} else {
 						logger.info(

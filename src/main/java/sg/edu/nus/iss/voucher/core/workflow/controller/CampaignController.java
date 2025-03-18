@@ -464,7 +464,7 @@ public class CampaignController {
 				return ResponseEntity.status(validationResult.getStatus()).body(APIResponse.error(message));
 			}
 
-			CampaignDTO campaignDTO = campaignService.promote(campaignId, userId);
+			CampaignDTO campaignDTO = campaignService.promote(campaignId, userId,authorizationHeader);
 			if (campaignDTO != null && campaignDTO.getCampaignId() != null) {
 				message = "Campaign has been promoted successfully.";
 				

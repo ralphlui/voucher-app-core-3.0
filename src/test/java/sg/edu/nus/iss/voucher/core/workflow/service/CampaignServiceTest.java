@@ -172,6 +172,7 @@ public class CampaignServiceTest {
 
 	@Test
 	void promoteCampaign() {
+		 String authorizationHeader = "Bearer mock.jwt.token";
 		campaign1.setCampaignStatus(CampaignStatus.CREATED);
 		LocalDateTime currentTime = LocalDateTime.now();
 		LocalDateTime startDate = currentTime.plusDays(5);
@@ -184,7 +185,7 @@ public class CampaignServiceTest {
 		Mockito.when(storeRepository.findById(store.getStoreId())).thenReturn(Optional.of(store));
 		Mockito.when(campaignRepository.findById(campaign1.getCampaignId())).thenReturn(Optional.of(campaign1));
 		
-		CampaignDTO campaignDTO = campaignService.promote(campaign1.getCampaignId(),campaign1.getUpdatedBy());
+		CampaignDTO campaignDTO = campaignService.promote(campaign1.getCampaignId(),campaign1.getUpdatedBy(),authorizationHeader);
 		assertEquals(campaignDTO.getCampaignStatus(), CampaignStatus.PROMOTED);
 	}
 

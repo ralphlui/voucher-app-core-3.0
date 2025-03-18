@@ -23,7 +23,7 @@ public interface ICampaignService {
 
 	CampaignDTO update(Campaign campaign);
 
-	CampaignDTO promote(String campaignId,String userId);
+	CampaignDTO promote(String campaignId,String userId,String authorizationHeader);
 
 	int expired();
 

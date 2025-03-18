@@ -26,10 +26,10 @@ public class JWTService {
 
 	@Autowired
 	private JWTConfig jwtConfig;
-	
+
 	@Autowired
 	ApplicationContext context;
-	
+
 	@Autowired
 	JSONReader jsonReader;
 
@@ -53,13 +53,12 @@ public class JWTService {
 	public Claims extractAllClaims(String token) throws JwtException, IllegalArgumentException, Exception {
 		return Jwts.parser().verifyWith(loadPublicKey()).build().parseSignedClaims(token).getPayload();
 	}
-	
+
 	public UserDetails getUserDetail(String token) throws JwtException, IllegalArgumentException, Exception {
 		String userID = extractUserID(token);
-		User user = jsonReader.getActiveUserDetails(userID,token);
-		UserDetails userDetails = org.springframework.security.core.userdetails.User
-				.withUsername(user.getEmail()).password(user.getPassword()).roles(user.getRole().toString())
-				.build();
+		User user = jsonReader.getActiveUserDetails(userID, token);
+		UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
+				.password(user.getPassword()).roles(user.getRole().toString()).build();
 		return userDetails;
 	}
 
@@ -77,19 +76,18 @@ public class JWTService {
 	public Date extractExpiration(String token) throws JwtException, IllegalArgumentException, Exception {
 		return extractClaim(token, Claims::getExpiration);
 	}
-	
-    public String hashWithSHA256(String token) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = digest.digest(token.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(hashedBytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing refresh token", e);
-        }
-    }
-    
-    
-    public String retrieveUserID(String authorizationHeader) throws JwtException, IllegalArgumentException, Exception {
+
+	public String hashWithSHA256(String token) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			byte[] hashedBytes = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+			return Base64.getEncoder().encodeToString(hashedBytes);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException("Error hashing refresh token", e);
+		}
+	}
+
+	public String retrieveUserID(String authorizationHeader) throws JwtException, IllegalArgumentException, Exception {
 		try {
 			String token = authorizationHeader.substring(7);
 			Claims claims = extractAllClaims(token);
@@ -112,17 +110,28 @@ public class JWTService {
 			return "Invalid Username";
 		}
 	}
-	
-	 public String getUserIdByAuthHeader(String authHeader) throws JwtException, IllegalArgumentException, Exception {
-	    	String userID ="";
-	    	String jwtToken = authHeader.substring(7); // Remove "Bearer " prefix
-	    	if(jwtToken != null) {
-	    		 userID = extractUserID(jwtToken);
-	    		
-	    	}
-			return userID;
-	    }
 
+	public String getUserIdByAuthHeader(String authHeader) throws JwtException, IllegalArgumentException, Exception {
+		String userID = "";
+		String jwtToken = authHeader.substring(7); // Remove "Bearer " prefix
+		if (jwtToken != null) {
+			userID = extractUserID(jwtToken);
 
-   
+		}
+		return userID;
+	}
+
+	public String retrieveUserEmail(String authorizationHeader) throws JwtException, IllegalArgumentException, Exception {
+		try {
+			String token = authorizationHeader.substring(7);
+			Claims claims = extractAllClaims(token);
+			String email = claims.get("userEmail", String.class);
+			return email;
+		} catch (ExpiredJwtException e) {
+			return e.getClaims().get("userEmail", String.class);
+		} catch (Exception e) {
+			return "Invalid userEmail";
+		}
+	}
+
 }
