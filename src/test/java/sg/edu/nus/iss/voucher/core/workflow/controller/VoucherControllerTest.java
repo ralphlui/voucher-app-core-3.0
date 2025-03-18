@@ -1,5 +1,9 @@
 package sg.edu.nus.iss.voucher.core.workflow.controller;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -12,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,10 +46,13 @@ import sg.edu.nus.iss.voucher.core.workflow.entity.Voucher;
 import sg.edu.nus.iss.voucher.core.workflow.enums.CampaignStatus;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.enums.VoucherStatus;
+import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
+import sg.edu.nus.iss.voucher.core.workflow.pojo.User;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.CampaignService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.VoucherService;
 import sg.edu.nus.iss.voucher.core.workflow.utility.DTOMapper;
+import sg.edu.nus.iss.voucher.core.workflow.utility.JSONReader;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -71,7 +80,11 @@ public class VoucherControllerTest {
 	@MockBean
 	AuthAPICall apiCall;
 
+	@MockBean
+	private JWTService jwtService;
 
+	@MockBean
+	private JSONReader jsonReader;
 
 	private static List<VoucherDTO> mockVouchers = new ArrayList<>();
 	private static Store store = new Store("1", "MUJI",
@@ -87,11 +100,28 @@ public class VoucherControllerTest {
 			"U1");
 	
 	static String userId ="user123";
+	static String authorizationHeader = "Bearer mock.jwt.token";
+	
+	@BeforeEach
+	void setUp() throws Exception {
+		mockVouchers.add(DTOMapper.toVoucherDTO(voucher1));
+		mockVouchers.add(DTOMapper.toVoucherDTO(voucher1));
 
-	@BeforeAll
-	static void setUp() {
-		mockVouchers.add(DTOMapper.toVoucherDTO(voucher1));
-		mockVouchers.add(DTOMapper.toVoucherDTO(voucher1));
+		User mockUser = new User();
+		mockUser.setEmail("eleven.11@gmail.com");
+		mockUser.setPassword("111111");
+		mockUser.setUserId("12345");
+		when(jsonReader.getActiveUserDetails("12345", "mock.jwt.token")).thenReturn(mockUser);
+
+		when(jwtService.extractUserID("mock.jwt.token")).thenReturn(userId);
+
+		UserDetails mockUserDetails = mock(UserDetails.class);
+		when(jwtService.getUserDetail(anyString())).thenReturn(mockUserDetails);
+
+		when(jwtService.validateToken(anyString(), eq(mockUserDetails))).thenReturn(true);
+
+		when(jwtService.getUserIdByAuthHeader(authorizationHeader)).thenReturn(userId);
+
 	}
 
 
@@ -100,7 +130,7 @@ public class VoucherControllerTest {
 		Mockito.when(voucherService.findByVoucherId(voucher2.getVoucherId()))
 				.thenReturn(DTOMapper.toVoucherDTO(voucher2));
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/vouchers/{id}", voucher2.getVoucherId())
-				.header("Authorization", "").contentType(MediaType.APPLICATION_JSON))
+				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON))
 		         .andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))	
@@ -122,7 +152,7 @@ public class VoucherControllerTest {
 		voucherRequest.setClaimedBy(voucher1.getClaimedBy());
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/vouchers/claim")
-				.header("Authorization", "").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization",authorizationHeader).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(voucherRequest))).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))	
@@ -139,7 +169,7 @@ public class VoucherControllerTest {
 		Mockito.when(voucherService.findByClaimedByAndVoucherStatus("U1",VoucherStatus.CLAIMED.toString(), pageable))
 				.thenReturn(mockVoucherMap);
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/vouchers/users/{userId}","U1")
-				.header("Authorization", "").param("status", "CLAIMED").param("size", "10")
+				.header("Authorization", authorizationHeader).param("status", "CLAIMED").param("size", "10")
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -157,7 +187,7 @@ public class VoucherControllerTest {
 				.thenReturn(mockVoucherMap);
 		mockMvc.perform(
 				MockMvcRequestBuilders.get("/api/core/vouchers/campaigns/{campaignId}",campaign.getCampaignId())
-				.header("Authorization", "").param("query", "").param("page", "0").param("size", "10")
+				.header("Authorization", authorizationHeader).param("query", "").param("page", "0").param("size", "10")
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -175,7 +205,7 @@ public class VoucherControllerTest {
 		Mockito.when(voucherService.consumeVoucher(voucher1.getVoucherId())).thenReturn(DTOMapper.toVoucherDTO(voucher1));
 
 		mockMvc.perform(MockMvcRequestBuilders.patch("/api/core/vouchers/{id}/consume", voucher1.getVoucherId())
-				.header("Authorization", "").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(voucher1))).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))	

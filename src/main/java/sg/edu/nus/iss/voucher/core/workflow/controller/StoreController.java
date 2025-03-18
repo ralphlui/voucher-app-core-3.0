@@ -31,7 +31,7 @@ import sg.edu.nus.iss.voucher.core.workflow.entity.Store;
 import sg.edu.nus.iss.voucher.core.workflow.enums.HTTPVerb;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.exception.StoreNotFoundException;
-import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTUtility;
+import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.AuditService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.StoreService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
@@ -60,7 +60,7 @@ public class StoreController {
 	private AuditService auditService;
 	
 	@Autowired
-	private JWTUtility jwtUtility;
+	private JWTService jwtService;
 
 	@Value("${audit.activity.type.prefix}")
 	String activityTypePrefix;
@@ -78,7 +78,7 @@ public class StoreController {
 
 		try {
             
-			userId = jwtUtility.retrieveUserID(authorizationHeader);
+			userId = jwtService.retrieveUserID(authorizationHeader);
 			Pageable pageable = PageRequest.of(page, size, Sort.by("storeName").ascending());
 			Map<Long, List<StoreDTO>> resultMap = storeService.getAllActiveStoreList(query, pageable);
 			logger.info("size" + resultMap.size());
@@ -120,7 +120,7 @@ public class StoreController {
 		String userid = "Invalid UserID";
 		
 		try {
-		    userid = jwtUtility.retrieveUserID(authorizationHeader);
+		    userid = jwtService.retrieveUserID(authorizationHeader);
 			ValidationResult validationResult = storeValidationStrategy.validateCreation(store, uploadFile, authorizationHeader);
 
 			if (validationResult.isValid()) {
@@ -155,7 +155,7 @@ public class StoreController {
 		String userId = "Invalid UserID";
 
 		try {
-			userId = jwtUtility.retrieveUserID(authorizationHeader);
+			userId = jwtService.retrieveUserID(authorizationHeader);
 			String storeId = GeneralUtility.makeNotNull(id).trim();
 			logger.info("storeId: " + storeId);
 
@@ -196,7 +196,7 @@ public class StoreController {
 
 		try {
 
-			authorizationUserID = jwtUtility.retrieveUserID(authorizationHeader);
+			authorizationUserID = jwtService.retrieveUserID(authorizationHeader);
 			if (userId.isEmpty()) {
 				message = "User id cannot be blank.";
 				logger.error(message);
@@ -257,7 +257,7 @@ public class StoreController {
 		String userid = "Invalid UserID";
 
 		try {
-			userid = jwtUtility.retrieveUserID(authorizationHeader);
+			userid = jwtService.retrieveUserID(authorizationHeader);
 			ValidationResult validationResult = storeValidationStrategy.validateUpdating(store, uploadFile, authorizationHeader);
 			if (!validationResult.isValid()) {
 				message = validationResult.getMessage();

@@ -14,7 +14,7 @@ import sg.edu.nus.iss.voucher.core.workflow.aws.service.SQSPublishingService;
 import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
 import sg.edu.nus.iss.voucher.core.workflow.enums.AuditResponseStatus;
 import sg.edu.nus.iss.voucher.core.workflow.enums.HTTPVerb;
-import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTUtility;
+import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
 import sg.edu.nus.iss.voucher.core.workflow.service.IAuditService;
 
 @Service
@@ -29,7 +29,7 @@ public class AuditService implements IAuditService {
 	private SQSPublishingService sqsPublishingService;
 	
 	@Autowired
-	private JWTUtility jwtUtility;
+	private JWTService jwtService;
 
 	@Override
 	public void sendMessage(AuditDTO autAuditDTO, String authorizationHeader) {
@@ -39,7 +39,7 @@ public class AuditService implements IAuditService {
 			String userName = "Invalid Username";
 
 			if (!jwtToken.isEmpty()) {
-			   userName = Optional.ofNullable(jwtUtility.retrieveUserName(jwtToken))
+			   userName = Optional.ofNullable(jwtService.retrieveUserName(jwtToken))
 		                   .orElse("Invalid Username");
 			   autAuditDTO.setUsername(userName);
 

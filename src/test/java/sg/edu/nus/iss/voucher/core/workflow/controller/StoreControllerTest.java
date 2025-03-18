@@ -1,5 +1,8 @@
 package sg.edu.nus.iss.voucher.core.workflow.controller;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -10,9 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,6 +28,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,15 +39,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jsonwebtoken.Claims;
 import sg.edu.nus.iss.voucher.core.workflow.api.connector.AuthAPICall;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreDTO;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Store;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
-import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTUtility;
+import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
+import sg.edu.nus.iss.voucher.core.workflow.pojo.User;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.StoreService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
 import sg.edu.nus.iss.voucher.core.workflow.utility.DTOMapper;
+import sg.edu.nus.iss.voucher.core.workflow.utility.JSONReader;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -66,10 +72,16 @@ public class StoreControllerTest {
 	@MockBean
 	private UserValidatorService userValidatorService;
 	
-	@Mock
-	private JWTUtility jwtUtility;
+	@MockBean
+	private JWTService jwtService;
+
+	@MockBean
+	private JSONReader jsonReader;
 	
 	private static List<StoreDTO> mockStores = new ArrayList<>();
+	
+	static String authorizationHeader = "Bearer mock.jwt.token";
+	static String userId = "user123";
 
 	private static Store store1 = new Store("1", "MUJI",
 			"MUJI offers a wide variety of good quality items from stationery to household items and apparel.", "Test",
@@ -80,11 +92,27 @@ public class StoreControllerTest {
 			"#04-36/40 Paragon Shopping Centre", "290 Orchard Rd", "", "238859", "Singapore", "Singapore", "Singapore",
 			null, null, null, null, false, null, "", "");
 
-	@BeforeAll
-	static void setUp() {
-
+	
+	@BeforeEach
+	void setUp() throws Exception {
 		mockStores.add(DTOMapper.toStoreDTO(store1));
 		mockStores.add(DTOMapper.toStoreDTO(store2));
+
+		User mockUser = new User();
+		mockUser.setEmail("eleven.11@gmail.com");
+		mockUser.setPassword("111111");
+		mockUser.setUserId("12345");
+		when(jsonReader.getActiveUserDetails("12345", "mock.jwt.token")).thenReturn(mockUser);
+
+		when(jwtService.extractUserID("mock.jwt.token")).thenReturn(userId);
+
+		UserDetails mockUserDetails = mock(UserDetails.class);
+		when(jwtService.getUserDetail(anyString())).thenReturn(mockUserDetails);
+
+		when(jwtService.validateToken(anyString(), eq(mockUserDetails))).thenReturn(true);
+
+		when(jwtService.getUserIdByAuthHeader(authorizationHeader)).thenReturn(userId);
+
 	}
 	
 	@Test
@@ -98,7 +126,7 @@ public class StoreControllerTest {
 		
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores").param("query", "").param("page", "0")
 				.param("size", "10")
-				.header("Authorization", "")
+				.header("Authorization", authorizationHeader)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))
 				.andExpect(jsonPath("$.message").value("Successfully retrieved all active stores."))
@@ -108,7 +136,7 @@ public class StoreControllerTest {
 
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores").param("query", "SK").param("page", "0")
 				.param("size", "10")
-				.header("Authorization", "")
+				.header("Authorization", authorizationHeader)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -122,7 +150,7 @@ public class StoreControllerTest {
 		Mockito.when(storeService.getAllActiveStoreList("",pageable)).thenReturn(emptyMockStoreMap);
 
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores").param("query", "").param("page", "0").param("size", "10")
-				.header("Authorization", "")
+				.header("Authorization", authorizationHeader)
 				.contentType(MediaType.APPLICATION_JSON))
 		        .andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -146,7 +174,25 @@ public class StoreControllerTest {
 		map.put(true, "User Account is active.");
 
 		
-		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString(), "")).thenReturn(map);
+		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString(), authorizationHeader)).thenReturn(map);
+		String mockResponse = "{\"success\":true,\"message\":\"eleven.11@gmail.com is Active\",\"totalRecord\":1,\"data\":{\"userID\":\""
+				+ userId
+				+ "\",\"email\":\"eleven.11@gmail.com\",\"username\":\"Eleven11\",\"role\":\"MERCHANT\",\"active\":true,\"verified\":true}}";
+
+		
+		JSONParser parser = new JSONParser();
+        JSONObject mockJsonResponse = (JSONObject) parser.parse(mockResponse);
+        when(jsonReader.parseJsonResponse(mockResponse)).thenReturn(mockJsonResponse);
+
+		JSONObject mockData = new JSONObject();
+        mockData.put("userID", "user123");
+        mockData.put("role","MERCHANT");
+        Boolean mockSuccess = true;
+        String mockMessage = "eleven.11@gmail.com is Active";
+      
+        when(jsonReader.getDataFromResponse(mockJsonResponse)).thenReturn(mockData);
+        when(jsonReader.getSuccessFromResponse(mockJsonResponse)).thenReturn(mockSuccess);
+        when(jsonReader.getMessageFromResponse(mockJsonResponse)).thenReturn(mockMessage);
 		
 		
 		Mockito.when(storeService.findByStoreName(store1.getStoreName())).thenReturn(storeDTO);
@@ -155,7 +201,7 @@ public class StoreControllerTest {
 				.thenReturn(DTOMapper.toStoreDTO(store1));
 	
 		mockMvc.perform(MockMvcRequestBuilders.multipart("/api/core/stores").file(store).file(uploadFile)
-				.header("Authorization", "")
+				.header("Authorization", authorizationHeader)
 				.contentType(MediaType.MULTIPART_FORM_DATA))
 		        .andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -166,7 +212,7 @@ public class StoreControllerTest {
 				objectMapper.writeValueAsBytes(store2));
 
 		mockMvc.perform(MockMvcRequestBuilders.multipart("/api/core/stores").file(storeFile).file(uploadFile)
-				.header("Authorization", "")
+				.header("Authorization", authorizationHeader)
 				.contentType(MediaType.MULTIPART_FORM_DATA))
 		        .andExpect(MockMvcResultMatchers.status().isBadRequest())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -179,7 +225,7 @@ public class StoreControllerTest {
 	void testGetStoreById() throws Exception {
 		Mockito.when(storeService.findByStoreId(store1.getStoreId())).thenReturn(DTOMapper.toStoreDTO(store1));
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores/{id}", store1.getStoreId())
-				.header("Authorization", "")
+				.header("Authorization", authorizationHeader)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(store1))).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -201,7 +247,7 @@ public class StoreControllerTest {
 
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores/users/{userId}", store1.getCreatedBy())
 				.param("page", "0").param("size", "10")
-				.header("Authorization", "")
+				.header("Authorization", authorizationHeader)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -224,7 +270,26 @@ public class StoreControllerTest {
 		map.put(true, "User Account is active.");
 
 		
-		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString(), "")).thenReturn(map);
+		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString(), authorizationHeader)).thenReturn(map);
+		
+		String mockResponse = "{\"success\":true,\"message\":\"eleven.11@gmail.com is Active\",\"totalRecord\":1,\"data\":{\"userID\":\""
+				+ userId
+				+ "\",\"email\":\"eleven.11@gmail.com\",\"username\":\"Eleven11\",\"role\":\"MERCHANT\",\"active\":true,\"verified\":true}}";
+
+		
+		JSONParser parser = new JSONParser();
+        JSONObject mockJsonResponse = (JSONObject) parser.parse(mockResponse);
+        when(jsonReader.parseJsonResponse(mockResponse)).thenReturn(mockJsonResponse);
+
+		JSONObject mockData = new JSONObject();
+        mockData.put("userID", "user123");
+        mockData.put("role","MERCHANT");
+        Boolean mockSuccess = true;
+        String mockMessage = "eleven.11@gmail.com is Active";
+      
+        when(jsonReader.getDataFromResponse(mockJsonResponse)).thenReturn(mockData);
+        when(jsonReader.getSuccessFromResponse(mockJsonResponse)).thenReturn(mockSuccess);
+        when(jsonReader.getMessageFromResponse(mockJsonResponse)).thenReturn(mockMessage);
 		
 		
 		Mockito.when(storeService.findByStoreId(store1.getStoreId())).thenReturn(DTOMapper.toStoreDTO(store1));
@@ -234,7 +299,7 @@ public class StoreControllerTest {
 				.thenReturn(DTOMapper.toStoreDTO(store1));
 
 		mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT,"/api/core/stores").file(store).file(uploadFile)
-				.header("Authorization", "")
+				.header("Authorization", authorizationHeader)
 				.contentType(MediaType.MULTIPART_FORM_DATA))
 		         .andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))

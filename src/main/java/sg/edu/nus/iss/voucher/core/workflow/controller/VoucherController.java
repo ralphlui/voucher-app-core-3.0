@@ -33,7 +33,7 @@ import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.enums.VoucherStatus;
 import sg.edu.nus.iss.voucher.core.workflow.exception.CampaignNotFoundException;
 import sg.edu.nus.iss.voucher.core.workflow.exception.VoucherNotFoundException;
-import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTUtility;
+import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.*;
 import sg.edu.nus.iss.voucher.core.workflow.utility.GeneralUtility;
 
@@ -57,7 +57,7 @@ public class VoucherController {
 	private AuditService auditService;
 	
 	@Autowired
-	private JWTUtility jwtUtility;
+	private JWTService jwtService;
 	
 	
 	@Value("${audit.activity.type.prefix}")
@@ -68,7 +68,7 @@ public class VoucherController {
 		String voucherId = id.trim();
 		
 		
-		String userId = jwtUtility.retrieveUserID(authorizationHeader);
+		String userId = jwtService.retrieveUserID(authorizationHeader);
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Find Voucher by Id.", activityTypePrefix,"/api/core/vouchers/"+id, HTTPVerb.GET);
         String message="";
 		try {
@@ -110,7 +110,7 @@ public class VoucherController {
 	@PostMapping(value = "/claim", produces = "application/json")
 	public ResponseEntity<APIResponse<VoucherDTO>> claimVoucher(@RequestHeader("Authorization") String authorizationHeader, @RequestBody VoucherRequest voucherRequest) throws JwtException, IllegalArgumentException, Exception {
 		
-		String authorizationUserID = jwtUtility.retrieveUserID(authorizationHeader);
+		String authorizationUserID = jwtService.retrieveUserID(authorizationHeader);
 		AuditDTO auditDTO = auditService.createAuditDTO(authorizationUserID, "Claim Voucher", activityTypePrefix,"/api/core/vouchers/claim", HTTPVerb.POST);
         String message="";
 		try {
@@ -172,7 +172,7 @@ public class VoucherController {
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int size) throws JwtException, IllegalArgumentException, Exception {
 
 		
-		String authHeaderUserId = jwtUtility.retrieveUserID(authorizationHeader);
+		String authHeaderUserId = jwtService.retrieveUserID(authorizationHeader);
 		AuditDTO auditDTO = auditService.createAuditDTO(authHeaderUserId, "Claimed Voucher List by User", activityTypePrefix,"/api/core/vouchers/users/"+userId, HTTPVerb.GET);
         String message="";
         
@@ -223,7 +223,7 @@ public class VoucherController {
 			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("campaignId") String campaignId,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int size) throws JwtException, IllegalArgumentException, Exception {
 
-		String authHeaderUserId = jwtUtility.retrieveUserID(authorizationHeader);
+		String authHeaderUserId = jwtService.retrieveUserID(authorizationHeader);
 		AuditDTO auditDTO = auditService.createAuditDTO(authHeaderUserId, "Claimed Voucher List by Campaign", activityTypePrefix,
 				"/api/core/vouchers/campaigns/" + campaignId, HTTPVerb.GET);
 		String message = "";
@@ -279,7 +279,7 @@ public class VoucherController {
 
 		logger.info("Calling Voucher consume API...");
 		
-		String authHeaderUserId = jwtUtility.retrieveUserID(authorizationHeader);
+		String authHeaderUserId = jwtService.retrieveUserID(authorizationHeader);
 		AuditDTO auditDTO = auditService.createAuditDTO(authHeaderUserId, "Consume Voucher", activityTypePrefix,"/api/core/vouchers/"+voucherId+"/consume", HTTPVerb.PATCH);
         String message="";
 
