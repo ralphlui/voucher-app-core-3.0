@@ -52,7 +52,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: my-secret
-                  key: jwt_private_key
+                  key: jwt_public_key
             - name: AUTH_URL
               valueFrom:
                 configMapKeyRef:
