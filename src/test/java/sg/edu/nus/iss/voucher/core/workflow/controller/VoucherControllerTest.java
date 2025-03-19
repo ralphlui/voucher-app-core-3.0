@@ -116,7 +116,7 @@ public class VoucherControllerTest {
 		when(jwtService.extractUserID("mock.jwt.token")).thenReturn(userId);
 
 		UserDetails mockUserDetails = mock(UserDetails.class);
-		when(jwtService.getUserDetail(anyString())).thenReturn(mockUserDetails);
+		when(jwtService.getUserDetail(anyString(), anyString())).thenReturn(mockUserDetails);
 
 		when(jwtService.validateToken(anyString(), eq(mockUserDetails))).thenReturn(true);
 

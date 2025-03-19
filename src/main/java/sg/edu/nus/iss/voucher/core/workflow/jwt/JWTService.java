@@ -3,6 +3,7 @@ package sg.edu.nus.iss.voucher.core.workflow.jwt;
 import java.util.Date;
 import java.util.function.Function;
 
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,13 +54,24 @@ public class JWTService {
 	public Claims extractAllClaims(String token) throws JwtException, IllegalArgumentException, Exception {
 		return Jwts.parser().verifyWith(loadPublicKey()).build().parseSignedClaims(token).getPayload();
 	}
-
-	public UserDetails getUserDetail(String token) throws JwtException, IllegalArgumentException, Exception {
+	
+	public UserDetails getUserDetail(String authorizationHeader,String token) throws JwtException, IllegalArgumentException, Exception {
 		String userID = extractUserID(token);
-		User user = jsonReader.getActiveUserDetails(userID, token);
-		UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
-				.password(user.getPassword()).roles(user.getRole().toString()).build();
-		return userDetails;
+		
+		JSONObject userJSONObjet = jsonReader.getActiveUser(userID, authorizationHeader);
+		Boolean success = jsonReader.getSuccessFromResponse(userJSONObjet);
+		String message = jsonReader.getMessageFromResponse(userJSONObjet);
+		
+		if (success) {
+			
+			User user = jsonReader.getUserObject(userJSONObjet);
+			UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
+					.password(user.getPassword()).roles(user.getRole().toString()).build();
+			return userDetails;
+			
+		} else {
+			throw new Exception(message);
+		}
 	}
 
 	public Boolean validateToken(String token, UserDetails userDetails)

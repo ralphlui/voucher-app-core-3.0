@@ -2,9 +2,6 @@ package sg.edu.nus.iss.voucher.core.workflow.jwt;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,13 +13,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import sg.edu.nus.iss.voucher.core.workflow.api.connector.AuthAPICall;
 import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
 import sg.edu.nus.iss.voucher.core.workflow.enums.HTTPVerb;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.AuditService;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import io.jsonwebtoken.*;
 
@@ -48,6 +43,9 @@ public class JwtFilter extends OncePerRequestFilter {
 	        throws ServletException, IOException {
 	    
 	     authorizationHeader = request.getHeader("Authorization");
+	     userID = "Invalid UserID";
+	     apiEndpoint = request.getRequestURI();
+	     httpMethod =  HTTPVerb.fromString(request.getMethod());
 
 	    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
 	        handleException(response, "Authorization header is missing or invalid", HttpServletResponse.SC_UNAUTHORIZED);
@@ -57,7 +55,8 @@ public class JwtFilter extends OncePerRequestFilter {
 	    String jwtToken = authorizationHeader.substring(7);
 
 	    try {
-	        UserDetails userDetails = jwtService.getUserDetail(jwtToken);
+	    	userID = jwtService.retrieveUserID(authorizationHeader);
+	        UserDetails userDetails = jwtService.getUserDetail(authorizationHeader, jwtToken);
 	        if (jwtService.validateToken(jwtToken, userDetails)) {
 	            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
 	                    userDetails, null, userDetails.getAuthorities());

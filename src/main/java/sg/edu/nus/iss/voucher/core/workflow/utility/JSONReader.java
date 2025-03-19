@@ -49,6 +49,45 @@ public class JSONReader {
 		return status.intValue();
 	}
 	
+	public JSONObject getActiveUser(String userId,String authorizationHeader) {
+
+		JSONObject jsonResponse = new JSONObject();
+
+		String responseStr = apiCall.validateActiveUser(userId, authorizationHeader);
+
+		try {
+
+			JSONParser parser = new JSONParser();
+		    jsonResponse = (JSONObject) parser.parse(responseStr);
+			return jsonResponse;
+
+		} catch (ParseException e) {
+			e.printStackTrace();
+			logger.error("Error parsing JSON response for getActiveUserDetails... {}", e.toString());
+
+		}
+
+		return jsonResponse;
+	}
+	
+	public User getUserObject(JSONObject userJSONObject) {
+		User var = new User();
+		JSONObject data = getDataFromResponse(userJSONObject);
+		if (data != null) {
+			logger.info("User: " + data.toJSONString());
+			String userName = GeneralUtility.makeNotNull(data.get("username").toString());
+			String email = GeneralUtility.makeNotNull(data.get("email").toString());
+			String role = GeneralUtility.makeNotNull(data.get("role").toString());
+			String userID = GeneralUtility.makeNotNull(data.get("userID").toString());
+			var.setUserId(userID);
+			var.setEmail(email);
+			var.setRole(role);
+			var.setUsername(userName);
+		}
+
+		return var;
+	}
+	
 	public User getActiveUserDetails(String userId,String token) {
 
 		User var = new User();
@@ -59,9 +98,10 @@ public class JSONReader {
 
 			JSONParser parser = new JSONParser();
 			JSONObject jsonResponse = (JSONObject) parser.parse(responseStr);
-			JSONObject data = (JSONObject) jsonResponse.get("data");
-			logger.info("User: " + data.toJSONString());
-			if (data != null) {
+			Boolean success =getSuccessFromResponse(jsonResponse);
+			if (success) {
+				JSONObject data = getDataFromResponse(jsonResponse);
+				logger.info("User: " + data.toJSONString());
 				String userName = GeneralUtility.makeNotNull(data.get("username").toString());
 				String email = GeneralUtility.makeNotNull(data.get("email").toString());
 				String role = GeneralUtility.makeNotNull(data.get("role").toString());
