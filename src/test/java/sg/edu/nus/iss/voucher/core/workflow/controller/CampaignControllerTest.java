@@ -17,7 +17,6 @@ import java.util.Optional;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -41,7 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jsonwebtoken.JwtException;
 import sg.edu.nus.iss.voucher.core.workflow.api.connector.AuthAPICall;
 import sg.edu.nus.iss.voucher.core.workflow.dto.*;
 import sg.edu.nus.iss.voucher.core.workflow.entity.*;
@@ -113,7 +111,7 @@ public class CampaignControllerTest {
 		mockUser.setEmail("eleven.11@gmail.com");
 		mockUser.setPassword("111111");
 		mockUser.setUserId("12345");
-		when(jsonReader.getActiveUserDetails("12345", "mock.jwt.token")).thenReturn(mockUser);
+		//when(jsonReader.getActiveUserDetails("12345", "mock.jwt.token")).thenReturn(mockUser);
 
 		when(jwtService.extractUserID("mock.jwt.token")).thenReturn(userId);
 

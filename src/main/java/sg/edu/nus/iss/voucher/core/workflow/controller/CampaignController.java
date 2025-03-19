@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 import sg.edu.nus.iss.voucher.core.workflow.dto.*;
 import sg.edu.nus.iss.voucher.core.workflow.entity.*;
 import sg.edu.nus.iss.voucher.core.workflow.enums.*;
-import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.*;
 import sg.edu.nus.iss.voucher.core.workflow.strategy.impl.CampaignValidationStrategy;
 import sg.edu.nus.iss.voucher.core.workflow.utility.*;

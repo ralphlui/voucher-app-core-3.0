@@ -98,11 +98,8 @@ public class StoreControllerTest {
 		mockStores.add(DTOMapper.toStoreDTO(store1));
 		mockStores.add(DTOMapper.toStoreDTO(store2));
 
-		User mockUser = new User();
-		mockUser.setEmail("eleven.11@gmail.com");
-		mockUser.setPassword("111111");
-		mockUser.setUserId("12345");
-		when(jsonReader.getActiveUserDetails("12345", "mock.jwt.token")).thenReturn(mockUser);
+		JSONObject jsonObjet = new JSONObject();
+		when(jsonReader.getActiveUser("12345", "mock.jwt.token")).thenReturn(jsonObjet);
 
 		when(jwtService.extractUserID("mock.jwt.token")).thenReturn(userId);
 

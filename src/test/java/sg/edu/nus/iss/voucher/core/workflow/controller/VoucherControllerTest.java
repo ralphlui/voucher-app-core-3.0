@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -107,11 +107,8 @@ public class VoucherControllerTest {
 		mockVouchers.add(DTOMapper.toVoucherDTO(voucher1));
 		mockVouchers.add(DTOMapper.toVoucherDTO(voucher1));
 
-		User mockUser = new User();
-		mockUser.setEmail("eleven.11@gmail.com");
-		mockUser.setPassword("111111");
-		mockUser.setUserId("12345");
-		when(jsonReader.getActiveUserDetails("12345", "mock.jwt.token")).thenReturn(mockUser);
+		JSONObject jsonObjet = new JSONObject();
+		when(jsonReader.getActiveUser("12345", "mock.jwt.token")).thenReturn(jsonObjet);
 
 		when(jwtService.extractUserID("mock.jwt.token")).thenReturn(userId);
 
