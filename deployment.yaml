@@ -6,8 +6,7 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      app: voucher-app-core
-  template:
+      app: voucher-app-core template:
     metadata:
       labels:
         app: voucher-app-core
@@ -49,6 +48,11 @@ spec:
                 secretKeyRef:
                   name: my-secret
                   key: aes_secret
+            - name: JWT_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: jwt_private_key
             - name: AUTH_URL
               valueFrom:
                 configMapKeyRef:
@@ -59,6 +63,11 @@ spec:
                 configMapKeyRef:
                   name: my-configmap
                   key: AUDIT_SQS_URL
+            - name: FRONTEND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: my-configmap
+                  key: FRONTEND_URL
           resources:
            requests:
              cpu: "50m"
