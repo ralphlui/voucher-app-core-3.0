@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import sg.edu.nus.iss.voucher.core.workflow.api.connector.AuthAPICall;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreDTO;
+import sg.edu.nus.iss.voucher.core.workflow.dto.StoreRequest;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Store;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
@@ -220,11 +221,15 @@ public class StoreControllerTest {
 	
 	@Test
 	void testGetStoreById() throws Exception {
+		StoreRequest storeRequest = new StoreRequest();
+		storeRequest.setStoreId(store1.getStoreId());
+			
 		Mockito.when(storeService.findByStoreId(store1.getStoreId())).thenReturn(DTOMapper.toStoreDTO(store1));
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores/{id}", store1.getStoreId())
-				.header("Authorization", authorizationHeader)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(store1))).andExpect(MockMvcResultMatchers.status().isOk())
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/stores/my-store")
+				.contentType(MediaType.APPLICATION_JSON).header("Authorization", authorizationHeader)
+				.content(objectMapper.writeValueAsString(storeRequest)))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true)).andDo(print());
 	}
