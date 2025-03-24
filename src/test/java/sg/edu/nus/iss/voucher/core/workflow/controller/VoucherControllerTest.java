@@ -213,7 +213,7 @@ public class VoucherControllerTest {
 		voucher1.setVoucherStatus(VoucherStatus.CONSUMED);
 		Mockito.when(voucherService.consumeVoucher(voucher1.getVoucherId())).thenReturn(DTOMapper.toVoucherDTO(voucher1));
 
-		mockMvc.perform(MockMvcRequestBuilders.patch("/api/core/vouchers/{id}/consume", voucher1.getVoucherId())
+		mockMvc.perform(MockMvcRequestBuilders.patch("/api/core/vouchers/consume")
 				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(voucher1))).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))

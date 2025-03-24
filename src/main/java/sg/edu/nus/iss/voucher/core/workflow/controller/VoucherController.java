@@ -275,9 +275,9 @@ public class VoucherController {
 
 	}
 
-	@PatchMapping(value = "{voucherID}/consume", produces = "application/json")
-	public ResponseEntity<APIResponse<VoucherDTO>> consumeVoucher(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("voucherID") String voucherID) throws JwtException, IllegalArgumentException, Exception {
-		String voucherId = GeneralUtility.makeNotNull(voucherID).trim();
+	@PatchMapping(value = "/consume", produces = "application/json")
+	public ResponseEntity<APIResponse<VoucherDTO>> consumeVoucher(@RequestHeader("Authorization") String authorizationHeader, @RequestBody VoucherRequest voucherRequest) throws JwtException, IllegalArgumentException, Exception {
+		String voucherId = GeneralUtility.makeNotNull(voucherRequest.getVoucherId()).trim();
 
 		logger.info("Calling Voucher consume API...");
 		
