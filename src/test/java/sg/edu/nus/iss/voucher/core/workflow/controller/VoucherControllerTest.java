@@ -187,13 +187,17 @@ public class VoucherControllerTest {
 		Pageable pageable = PageRequest.of(0, 10, Sort.by("claimTime").ascending());
 		Map<Long, List<VoucherDTO>> mockVoucherMap = new HashMap<>();
 		mockVoucherMap.put(0L, mockVouchers);
+		
+		VoucherRequest voucherRequest = new VoucherRequest();
+		voucherRequest.setCampaignId(campaign.getCampaignId());
 
 		Mockito.when(voucherService.findAllClaimedVouchersByCampaignId(campaign.getCampaignId(), pageable))
 				.thenReturn(mockVoucherMap);
 		mockMvc.perform(
-				MockMvcRequestBuilders.get("/api/core/vouchers/campaigns/{campaignId}",campaign.getCampaignId())
+				MockMvcRequestBuilders.post("/api/core/vouchers/campaigns")
 				.header("Authorization", authorizationHeader).param("query", "").param("page", "0").param("size", "10")
-						.contentType(MediaType.APPLICATION_JSON))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(voucherRequest)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data[0].voucherId").value(1))
