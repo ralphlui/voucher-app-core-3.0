@@ -166,12 +166,16 @@ public class VoucherControllerTest {
 		Pageable pageable = PageRequest.of(0, 10, Sort.by("claimTime").ascending());
 		Map<Long, List<VoucherDTO>> mockVoucherMap = new HashMap<>();
 		mockVoucherMap.put(0L, mockVouchers);
+		
+		VoucherRequest voucherRequest = new VoucherRequest();
+		voucherRequest.setClaimedBy(voucher2.getClaimedBy());
 
-		Mockito.when(voucherService.findByClaimedByAndVoucherStatus("U1",VoucherStatus.CLAIMED.toString(), pageable))
+		Mockito.when(voucherService.findByClaimedByAndVoucherStatus(voucher2.getClaimedBy(),VoucherStatus.CLAIMED.toString(), pageable))
 				.thenReturn(mockVoucherMap);
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/vouchers/users/{userId}","U1")
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/vouchers/users")
 				.header("Authorization", authorizationHeader).param("status", "CLAIMED").param("size", "10")
-				.contentType(MediaType.APPLICATION_JSON))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(voucherRequest)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data[0].voucherId").value(1))

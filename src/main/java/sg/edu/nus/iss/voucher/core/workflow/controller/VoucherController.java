@@ -167,14 +167,15 @@ public class VoucherController {
 		}
 	}
 	
-	@GetMapping(value = "/users/{userId}", produces = "application/json")
-	public ResponseEntity<APIResponse<List<VoucherDTO>>> findAllClaimedVouchersByUserId(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("userId") String userId,@RequestParam(defaultValue = "") String status,
+	@PostMapping(value = "/users", produces = "application/json")
+	public ResponseEntity<APIResponse<List<VoucherDTO>>> findAllClaimedVouchersByUserId(@RequestHeader("Authorization") String authorizationHeader,	@RequestBody VoucherRequest voucherRequest, @RequestParam(defaultValue = "") String status,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int size) throws JwtException, IllegalArgumentException, Exception {
 
 		
 		String authHeaderUserId = jwtService.retrieveUserID(authorizationHeader);
-		AuditDTO auditDTO = auditService.createAuditDTO(authHeaderUserId, "Claimed Voucher List by User", activityTypePrefix,"/api/core/vouchers/users/"+userId, HTTPVerb.GET);
+		AuditDTO auditDTO = auditService.createAuditDTO(authHeaderUserId, "Claimed Voucher List by User", activityTypePrefix,"/api/core/vouchers/users", HTTPVerb.POST);
         String message="";
+        String userId = voucherRequest.getClaimedBy();
         
 		try {
 			logger.info("Calling get Voucher by email API with status={}, page={}, size={}",status, page, size);
