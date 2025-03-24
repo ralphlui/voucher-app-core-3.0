@@ -47,7 +47,6 @@ import sg.edu.nus.iss.voucher.core.workflow.enums.CampaignStatus;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.enums.VoucherStatus;
 import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
-import sg.edu.nus.iss.voucher.core.workflow.pojo.User;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.CampaignService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.VoucherService;
@@ -124,11 +123,15 @@ public class VoucherControllerTest {
 
 	@Test
 	void testGetVoucherByVoucherId() throws Exception {
+		VoucherRequest voucherRequest = new VoucherRequest();
+		voucherRequest.setVoucherId(voucher2.getVoucherId());
+		
 		Mockito.when(voucherService.findByVoucherId(voucher2.getVoucherId()))
 				.thenReturn(DTOMapper.toVoucherDTO(voucher2));
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/vouchers/{id}", voucher2.getVoucherId())
-				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON))
-		         .andExpect(MockMvcResultMatchers.status().isOk())
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/vouchers")
+				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(voucherRequest)))
+		        .andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))	
 				.andExpect(jsonPath("$.message").value("Successfully retrieved the voucher associated with the specified ID: " + voucher2.getVoucherId())).andDo(print());
@@ -162,12 +165,16 @@ public class VoucherControllerTest {
 		Pageable pageable = PageRequest.of(0, 10, Sort.by("claimTime").ascending());
 		Map<Long, List<VoucherDTO>> mockVoucherMap = new HashMap<>();
 		mockVoucherMap.put(0L, mockVouchers);
+		
+		VoucherRequest voucherRequest = new VoucherRequest();
+		voucherRequest.setClaimedBy(voucher2.getClaimedBy());
 
-		Mockito.when(voucherService.findByClaimedByAndVoucherStatus("U1",VoucherStatus.CLAIMED.toString(), pageable))
+		Mockito.when(voucherService.findByClaimedByAndVoucherStatus(voucher2.getClaimedBy(),VoucherStatus.CLAIMED.toString(), pageable))
 				.thenReturn(mockVoucherMap);
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/vouchers/users/{userId}","U1")
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/vouchers/users")
 				.header("Authorization", authorizationHeader).param("status", "CLAIMED").param("size", "10")
-				.contentType(MediaType.APPLICATION_JSON))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(voucherRequest)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data[0].voucherId").value(1))
@@ -179,13 +186,17 @@ public class VoucherControllerTest {
 		Pageable pageable = PageRequest.of(0, 10, Sort.by("claimTime").ascending());
 		Map<Long, List<VoucherDTO>> mockVoucherMap = new HashMap<>();
 		mockVoucherMap.put(0L, mockVouchers);
+		
+		VoucherRequest voucherRequest = new VoucherRequest();
+		voucherRequest.setCampaignId(campaign.getCampaignId());
 
 		Mockito.when(voucherService.findAllClaimedVouchersByCampaignId(campaign.getCampaignId(), pageable))
 				.thenReturn(mockVoucherMap);
 		mockMvc.perform(
-				MockMvcRequestBuilders.get("/api/core/vouchers/campaigns/{campaignId}",campaign.getCampaignId())
+				MockMvcRequestBuilders.post("/api/core/vouchers/campaigns")
 				.header("Authorization", authorizationHeader).param("query", "").param("page", "0").param("size", "10")
-						.contentType(MediaType.APPLICATION_JSON))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(voucherRequest)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data[0].voucherId").value(1))
@@ -201,7 +212,7 @@ public class VoucherControllerTest {
 		voucher1.setVoucherStatus(VoucherStatus.CONSUMED);
 		Mockito.when(voucherService.consumeVoucher(voucher1.getVoucherId())).thenReturn(DTOMapper.toVoucherDTO(voucher1));
 
-		mockMvc.perform(MockMvcRequestBuilders.patch("/api/core/vouchers/{id}/consume", voucher1.getVoucherId())
+		mockMvc.perform(MockMvcRequestBuilders.patch("/api/core/vouchers/consume")
 				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(voucher1))).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))

@@ -1,9 +1,7 @@
 package sg.edu.nus.iss.voucher.core.workflow.api.connector;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;

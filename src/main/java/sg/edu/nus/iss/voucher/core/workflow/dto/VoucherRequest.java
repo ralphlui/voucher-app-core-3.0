@@ -8,4 +8,5 @@ import lombok.Setter;
 public class VoucherRequest {
 	  private String campaignId;
 	  private String claimedBy;
+	  private String voucherId;
 }

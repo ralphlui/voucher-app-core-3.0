@@ -15,9 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -63,13 +61,13 @@ public class VoucherController {
 	@Value("${audit.activity.type.prefix}")
 	String activityTypePrefix;
 
-	@GetMapping(value = "/{id}", produces = "application/json")
-	public ResponseEntity<APIResponse<VoucherDTO>> getByVoucherId(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) throws JwtException, IllegalArgumentException, Exception {
-		String voucherId = id.trim();
+	@PostMapping(value = "", produces = "application/json")
+	public ResponseEntity<APIResponse<VoucherDTO>> getByVoucherId(@RequestHeader("Authorization") String authorizationHeader, 	@RequestBody VoucherRequest voucherRequest) throws JwtException, IllegalArgumentException, Exception {
+		String voucherId = voucherRequest.getVoucherId().trim();
 		
 		
 		String userId = jwtService.retrieveUserID(authorizationHeader);
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Find Voucher by Id.", activityTypePrefix,"/api/core/vouchers/"+id, HTTPVerb.GET);
+		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Find Voucher by Id.", activityTypePrefix,"/api/core/vouchers", HTTPVerb.POST);
         String message="";
 		try {
 			logger.info("Calling get Voucher API...");
@@ -167,14 +165,15 @@ public class VoucherController {
 		}
 	}
 	
-	@GetMapping(value = "/users/{userId}", produces = "application/json")
-	public ResponseEntity<APIResponse<List<VoucherDTO>>> findAllClaimedVouchersByUserId(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("userId") String userId,@RequestParam(defaultValue = "") String status,
+	@PostMapping(value = "/users", produces = "application/json")
+	public ResponseEntity<APIResponse<List<VoucherDTO>>> findAllClaimedVouchersByUserId(@RequestHeader("Authorization") String authorizationHeader,	@RequestBody VoucherRequest voucherRequest, @RequestParam(defaultValue = "") String status,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int size) throws JwtException, IllegalArgumentException, Exception {
 
 		
 		String authHeaderUserId = jwtService.retrieveUserID(authorizationHeader);
-		AuditDTO auditDTO = auditService.createAuditDTO(authHeaderUserId, "Claimed Voucher List by User", activityTypePrefix,"/api/core/vouchers/users/"+userId, HTTPVerb.GET);
+		AuditDTO auditDTO = auditService.createAuditDTO(authHeaderUserId, "Claimed Voucher List by User", activityTypePrefix,"/api/core/vouchers/users", HTTPVerb.POST);
         String message="";
+        String userId = voucherRequest.getClaimedBy();
         
 		try {
 			logger.info("Calling get Voucher by email API with status={}, page={}, size={}",status, page, size);
@@ -218,15 +217,16 @@ public class VoucherController {
 
 	}
 
-	@GetMapping(value = "/campaigns/{campaignId}", produces = "application/json")
+	@PostMapping(value = "/campaigns", produces = "application/json")
 	public ResponseEntity<APIResponse<List<VoucherDTO>>> findAllClaimedVouchersBycampaignId(
-			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("campaignId") String campaignId,
+			@RequestHeader("Authorization") String authorizationHeader, @RequestBody VoucherRequest voucherRequest,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int size) throws JwtException, IllegalArgumentException, Exception {
 
 		String authHeaderUserId = jwtService.retrieveUserID(authorizationHeader);
 		AuditDTO auditDTO = auditService.createAuditDTO(authHeaderUserId, "Claimed Voucher List by Campaign", activityTypePrefix,
-				"/api/core/vouchers/campaigns/" + campaignId, HTTPVerb.GET);
+				"/api/core/vouchers/campaigns", HTTPVerb.POST);
 		String message = "";
+		String campaignId = voucherRequest.getCampaignId();
 
 		try {
 			logger.info("Calling get Voucher by campaignId API...");
@@ -273,9 +273,9 @@ public class VoucherController {
 
 	}
 
-	@PatchMapping(value = "{voucherID}/consume", produces = "application/json")
-	public ResponseEntity<APIResponse<VoucherDTO>> consumeVoucher(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("voucherID") String voucherID) throws JwtException, IllegalArgumentException, Exception {
-		String voucherId = GeneralUtility.makeNotNull(voucherID).trim();
+	@PatchMapping(value = "/consume", produces = "application/json")
+	public ResponseEntity<APIResponse<VoucherDTO>> consumeVoucher(@RequestHeader("Authorization") String authorizationHeader, @RequestBody VoucherRequest voucherRequest) throws JwtException, IllegalArgumentException, Exception {
+		String voucherId = GeneralUtility.makeNotNull(voucherRequest.getVoucherId()).trim();
 
 		logger.info("Calling Voucher consume API...");
 		
