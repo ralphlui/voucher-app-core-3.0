@@ -184,21 +184,22 @@ public class StoreController {
 
 	}
 
-	@GetMapping(value = "/users/{userId}", produces = "application/json")
+	@PostMapping(value = "/users", produces = "application/json")
 	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllStoreByUser(@RequestHeader("Authorization") String authorizationHeader,
-			@PathVariable("userId") String userId, @RequestParam(defaultValue = "0") int page,
+			 @RequestBody StoreRequest storeRequest, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "500") int size) {
 
 		logger.info("Call store getAllByUser API with page={}, size={}", page, size);
 		String message = "";
 		String activityType = "GetAllStoreListByUserId";
-		String endpoint = String.format("api/core/stores/users/%s", userId);
+		String endpoint = String.format("api/core/stores/users");
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String authorizationUserID = "Invalid UserID";
 
 		try {
 
 			authorizationUserID = jwtService.retrieveUserID(authorizationHeader);
+			String userId = storeRequest.getCreatedBy();
 			if (userId.isEmpty()) {
 				message = "User id cannot be blank.";
 				logger.error(message);
