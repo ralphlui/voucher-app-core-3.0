@@ -241,16 +241,19 @@ public class StoreControllerTest {
 		Pageable pageable = PageRequest.of(0, 10, Sort.by("storeName").ascending());
 		Map<Long, List<StoreDTO>> mockStoreMap = new HashMap<>();
 		mockStoreMap.put(0L, mockStores);
+		StoreRequest storeRequest = new StoreRequest();
+		storeRequest.setCreatedBy(store1.getCreatedBy());
 		
 		Mockito.when(userValidatorService.validateActiveUser(store1.getCreatedBy(), UserRoleType.MERCHANT.toString(), "")).thenReturn(new HashMap<>());
 
 		Mockito.when(storeService.findActiveStoreListByUserId(store1.getCreatedBy(), false, pageable))
 				.thenReturn(mockStoreMap);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores/users/{userId}", store1.getCreatedBy())
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/stores/users")
 				.param("page", "0").param("size", "10")
+				.contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", authorizationHeader)
-				.contentType(MediaType.APPLICATION_JSON))
+				.content(objectMapper.writeValueAsString(storeRequest)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))
