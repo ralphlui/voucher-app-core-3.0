@@ -124,11 +124,15 @@ public class VoucherControllerTest {
 
 	@Test
 	void testGetVoucherByVoucherId() throws Exception {
+		VoucherRequest voucherRequest = new VoucherRequest();
+		voucherRequest.setVoucherId(voucher2.getVoucherId());
+		
 		Mockito.when(voucherService.findByVoucherId(voucher2.getVoucherId()))
 				.thenReturn(DTOMapper.toVoucherDTO(voucher2));
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/vouchers/{id}", voucher2.getVoucherId())
-				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON))
-		         .andExpect(MockMvcResultMatchers.status().isOk())
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/vouchers")
+				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(voucherRequest)))
+		        .andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))	
 				.andExpect(jsonPath("$.message").value("Successfully retrieved the voucher associated with the specified ID: " + voucher2.getVoucherId())).andDo(print());
