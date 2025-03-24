@@ -3,11 +3,8 @@ package sg.edu.nus.iss.voucher.core.workflow.aws.service;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.*;
 
-import io.jsonwebtoken.JwtException;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Campaign;
 import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
-import sg.edu.nus.iss.voucher.core.workflow.pojo.User;
-import sg.edu.nus.iss.voucher.core.workflow.utility.JSONReader;
 
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;

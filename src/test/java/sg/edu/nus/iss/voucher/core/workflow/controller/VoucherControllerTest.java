@@ -47,7 +47,6 @@ import sg.edu.nus.iss.voucher.core.workflow.enums.CampaignStatus;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.enums.VoucherStatus;
 import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
-import sg.edu.nus.iss.voucher.core.workflow.pojo.User;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.CampaignService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.VoucherService;
