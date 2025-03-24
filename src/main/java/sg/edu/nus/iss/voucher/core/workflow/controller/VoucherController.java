@@ -63,13 +63,13 @@ public class VoucherController {
 	@Value("${audit.activity.type.prefix}")
 	String activityTypePrefix;
 
-	@GetMapping(value = "/{id}", produces = "application/json")
-	public ResponseEntity<APIResponse<VoucherDTO>> getByVoucherId(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) throws JwtException, IllegalArgumentException, Exception {
-		String voucherId = id.trim();
+	@PostMapping(value = "", produces = "application/json")
+	public ResponseEntity<APIResponse<VoucherDTO>> getByVoucherId(@RequestHeader("Authorization") String authorizationHeader, 	@RequestBody VoucherRequest voucherRequest) throws JwtException, IllegalArgumentException, Exception {
+		String voucherId = voucherRequest.getVoucherId().trim();
 		
 		
 		String userId = jwtService.retrieveUserID(authorizationHeader);
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Find Voucher by Id.", activityTypePrefix,"/api/core/vouchers/"+id, HTTPVerb.GET);
+		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Find Voucher by Id.", activityTypePrefix,"/api/core/vouchers", HTTPVerb.POST);
         String message="";
 		try {
 			logger.info("Calling get Voucher API...");

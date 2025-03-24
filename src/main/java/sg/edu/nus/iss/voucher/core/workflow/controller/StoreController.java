@@ -153,7 +153,7 @@ public class StoreController {
 		String message = "";
 		String activityType = "GetStoreById";
 		String endpoint = String.format("api/core/stores");
-		HTTPVerb httpMethod = HTTPVerb.GET;
+		HTTPVerb httpMethod = HTTPVerb.POST;
 		String userId = "Invalid UserID";
 
 		try {
@@ -193,7 +193,7 @@ public class StoreController {
 		String message = "";
 		String activityType = "GetAllStoreListByUserId";
 		String endpoint = String.format("api/core/stores/users");
-		HTTPVerb httpMethod = HTTPVerb.GET;
+		HTTPVerb httpMethod = HTTPVerb.POST;
 		String authorizationUserID = "Invalid UserID";
 
 		try {
