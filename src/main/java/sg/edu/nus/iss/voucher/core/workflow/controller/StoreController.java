@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import sg.edu.nus.iss.voucher.core.workflow.dto.APIResponse;
 import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreDTO;
+import sg.edu.nus.iss.voucher.core.workflow.dto.StoreRequest;
 import sg.edu.nus.iss.voucher.core.workflow.dto.ValidationResult;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Store;
 import sg.edu.nus.iss.voucher.core.workflow.enums.HTTPVerb;
@@ -143,20 +145,20 @@ public class StoreController {
 
 	}
 
-	@GetMapping(value = "/{id}", produces = "application/json")
+	@PostMapping(value = "/my-store", produces = "application/json")
 	public ResponseEntity<APIResponse<StoreDTO>> getStoreById( @RequestHeader("Authorization") String authorizationHeader,
-			@PathVariable("id") String id) {
+			@RequestBody StoreRequest storeRequest) {
 		logger.info("Call store getStoreById API...");
 
 		String message = "";
 		String activityType = "GetStoreById";
-		String endpoint = String.format("api/core/stores/%s", id);
+		String endpoint = String.format("api/core/stores");
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String userId = "Invalid UserID";
 
 		try {
 			userId = jwtService.retrieveUserID(authorizationHeader);
-			String storeId = GeneralUtility.makeNotNull(id).trim();
+			String storeId = GeneralUtility.makeNotNull(storeRequest.getStoreId()).trim();
 			logger.info("storeId: " + storeId);
 
 			if (storeId.isEmpty()) {
