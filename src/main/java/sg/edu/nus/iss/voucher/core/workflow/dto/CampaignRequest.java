@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class MessagePayload {
+public class CampaignRequest {
 	private String campaignId;
 	private String storeId;
 	private String userId;

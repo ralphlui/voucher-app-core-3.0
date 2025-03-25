@@ -2,6 +2,7 @@ package sg.edu.nus.iss.voucher.core.workflow.controller;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import sg.edu.nus.iss.voucher.core.workflow.api.connector.AuthAPICall;
+import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
 import sg.edu.nus.iss.voucher.core.workflow.dto.VoucherDTO;
 import sg.edu.nus.iss.voucher.core.workflow.dto.VoucherRequest;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Campaign;
@@ -47,6 +50,7 @@ import sg.edu.nus.iss.voucher.core.workflow.enums.CampaignStatus;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.enums.VoucherStatus;
 import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
+import sg.edu.nus.iss.voucher.core.workflow.service.impl.AuditService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.CampaignService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.VoucherService;
@@ -84,6 +88,9 @@ public class VoucherControllerTest {
 
 	@MockBean
 	private JSONReader jsonReader;
+	
+	@MockBean
+    private AuditService auditService;
 
 	private static List<VoucherDTO> mockVouchers = new ArrayList<>();
 	private static Store store = new Store("1", "MUJI",
@@ -117,6 +124,10 @@ public class VoucherControllerTest {
 		when(jwtService.validateToken(anyString(), eq(mockUserDetails))).thenReturn(true);
 
 		when(jwtService.getUserIdByAuthHeader(authorizationHeader)).thenReturn(userId);
+		ArgumentCaptor<AuditDTO> auditDTOCaptor = ArgumentCaptor.forClass(AuditDTO.class);
+		   
+	    doNothing().when(auditService).logAudit(auditDTOCaptor.capture(), eq(200), eq("message"), eq("authorizationHeader"));
+
 
 	}
 

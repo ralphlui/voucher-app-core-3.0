@@ -106,7 +106,7 @@ public class CampaignControllerTest {
 			null, null, 10, LocalDateTime.now(), LocalDateTime.now(), userId, "", LocalDateTime.now(),
 			LocalDateTime.now(), null, "Clothes", false);
 	
-	private static MessagePayload  messagePayload = new MessagePayload( "1", "1", userId);
+	private static CampaignRequest  messagePayload = new CampaignRequest( "1", "1", userId);
 
 	@BeforeEach
 	void setUp() throws Exception {

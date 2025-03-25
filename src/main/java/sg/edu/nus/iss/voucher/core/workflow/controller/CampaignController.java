@@ -106,7 +106,7 @@ public class CampaignController {
 
 	@PostMapping(value = "/stores", produces = "application/json")
 	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllCampaignsByStoreId(
-			@RequestHeader("Authorization") String authorizationHeader, @RequestBody MessagePayload messagePayload,
+			@RequestHeader("Authorization") String authorizationHeader, @RequestBody CampaignRequest messagePayload,
 			@RequestParam(defaultValue = "") String status, @RequestParam(defaultValue = "") String description,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 		logger.info(
@@ -187,7 +187,7 @@ public class CampaignController {
 
 	@PostMapping(value = "/users", produces = "application/json")
 	public ResponseEntity<APIResponse<List<CampaignDTO>>> getCampaignsByUserId(
-			@RequestHeader("Authorization") String authorizationHeader, @RequestBody MessagePayload messagePayload,
+			@RequestHeader("Authorization") String authorizationHeader, @RequestBody CampaignRequest messagePayload,
 			@RequestParam(defaultValue = "") String description, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
 		long totalRecord = 0;
@@ -258,7 +258,7 @@ public class CampaignController {
 
 	@PostMapping(value = "/Id", produces = "application/json")
 	public ResponseEntity<APIResponse<CampaignDTO>> getByCampaignId(
-			@RequestHeader("Authorization") String authorizationHeader, @RequestBody MessagePayload messagePayload) {
+			@RequestHeader("Authorization") String authorizationHeader, @RequestBody CampaignRequest messagePayload) {
 
 		logger.info("Calling get Campaign API...");
 		String activityType = "Search Campaign by Id";
@@ -430,7 +430,7 @@ public class CampaignController {
 
 	@PostMapping(value = "/promote", produces = "application/json")
 	public ResponseEntity<APIResponse<CampaignDTO>> promoteCampaign(
-			@RequestHeader("Authorization") String authorizationHeader,  @RequestBody MessagePayload messagePayload) {
+			@RequestHeader("Authorization") String authorizationHeader,  @RequestBody CampaignRequest messagePayload) {
 		
 		logger.info("Calling Campaign Promote API...");
 		String activityType = "Promote Campaign";
