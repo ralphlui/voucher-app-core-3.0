@@ -1,9 +1,9 @@
 package sg.edu.nus.iss.voucher.core.workflow.controller;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.CoreMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,6 +19,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -84,7 +85,10 @@ public class CampaignControllerTest {
 
 	@MockBean
 	private JSONReader jsonReader;
-
+	
+	@MockBean
+    private AuditService auditService;
+	
 	private static List<CampaignDTO> mockCampaigns = new ArrayList<>();
 
 	static String userId = "user123";
@@ -123,6 +127,11 @@ public class CampaignControllerTest {
 		when(jwtService.validateToken(anyString(), eq(mockUserDetails))).thenReturn(true);
 
 		when(jwtService.getUserIdByAuthHeader(authorizationHeader)).thenReturn(userId);
+		
+		ArgumentCaptor<AuditDTO> auditDTOCaptor = ArgumentCaptor.forClass(AuditDTO.class);
+		   
+	    doNothing().when(auditService).logAudit(auditDTOCaptor.capture(), eq(200), eq("message"), eq("authorizationHeader"));
+
 
 	}
 	
@@ -130,37 +139,42 @@ public class CampaignControllerTest {
 	@Test
 	void testCreateCampaign() throws Exception {
 
-		String mockResponse = "{\"success\":true,\"message\":\"eleven.11@gmail.com is Active\",\"totalRecord\":1,\"data\":{\"userID\":\""
-				+ userId
-				+ "\",\"email\":\"eleven.11@gmail.com\",\"username\":\"Eleven11\",\"role\":\"MERCHANT\",\"active\":true,\"verified\":true}}";
-		
-        
-        Mockito.when(authAPICall.validateActiveUser(userId, authorizationHeader)).thenReturn(mockResponse);
-		
-        JSONParser parser = new JSONParser();
-        JSONObject mockJsonResponse = (JSONObject) parser.parse(mockResponse);
-        when(jsonReader.parseJsonResponse(mockResponse)).thenReturn(mockJsonResponse);
+	    String mockResponse = "{\"success\":true,\"message\":\"eleven.11@gmail.com is Active\",\"totalRecord\":1,\"data\":{\"userID\":\""
+	            + userId
+	            + "\",\"email\":\"eleven.11@gmail.com\",\"username\":\"Eleven11\",\"role\":\"MERCHANT\",\"active\":true,\"verified\":true}}";
 
-		JSONObject mockData = new JSONObject();
-        mockData.put("userID", "user123");
-        mockData.put("role","MERCHANT");
-        Boolean mockSuccess = true;
-        String mockMessage = "eleven.11@gmail.com is Active";
-      
-        when(jsonReader.getDataFromResponse(mockJsonResponse)).thenReturn(mockData);
-        when(jsonReader.getSuccessFromResponse(mockJsonResponse)).thenReturn(mockSuccess);
-        when(jsonReader.getMessageFromResponse(mockJsonResponse)).thenReturn(mockMessage);
-        
-        Mockito.when(storeService.findByStoreId(store.getStoreId())).thenReturn(DTOMapper.toStoreDTO(store));
+	    Mockito.when(authAPICall.validateActiveUser(userId, authorizationHeader)).thenReturn(mockResponse);
 
-		Mockito.when(campaignService.create(Mockito.any(Campaign.class)))
-				.thenReturn(DTOMapper.toCampaignDTO(campaign1));
+	    JSONParser parser = new JSONParser();
+	    JSONObject mockJsonResponse = (JSONObject) parser.parse(mockResponse);
+	    when(jsonReader.parseJsonResponse(mockResponse)).thenReturn(mockJsonResponse);
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/campaigns").header("Authorization", authorizationHeader)
-				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(campaign1)))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.success").value(true)).andDo(print());
+	    JSONObject mockData = new JSONObject();
+	    mockData.put("userID", "user123");
+	    mockData.put("role", "MERCHANT");
+	    Boolean mockSuccess = true;
+	    String mockMessage = "eleven.11@gmail.com is Active";
+
+	    when(jsonReader.getDataFromResponse(mockJsonResponse)).thenReturn(mockData);
+	    when(jsonReader.getSuccessFromResponse(mockJsonResponse)).thenReturn(mockSuccess);
+	    when(jsonReader.getMessageFromResponse(mockJsonResponse)).thenReturn(mockMessage);
+
+	    Mockito.when(storeService.findByStoreId(store.getStoreId())).thenReturn(DTOMapper.toStoreDTO(store));
+
+	    Mockito.when(campaignService.create(Mockito.any(Campaign.class)))
+	            .thenReturn(DTOMapper.toCampaignDTO(campaign1));
+
+	  	
+
+	    mockMvc.perform(MockMvcRequestBuilders.post("/api/core/campaigns")
+	            .header("Authorization", authorizationHeader)
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(objectMapper.writeValueAsString(campaign1)))
+	            .andExpect(MockMvcResultMatchers.status().isOk())
+	            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+	            .andExpect(jsonPath("$.success").value(true))
+	            .andDo(print());
+
 	}
 
 	@Test
