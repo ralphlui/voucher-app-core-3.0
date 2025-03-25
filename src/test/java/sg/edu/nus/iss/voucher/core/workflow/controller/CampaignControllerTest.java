@@ -101,6 +101,8 @@ public class CampaignControllerTest {
 	private static Campaign campaign2 = new Campaign("2", "new campaign 2", store, CampaignStatus.CREATED, null, 10, 0,
 			null, null, 10, LocalDateTime.now(), LocalDateTime.now(), userId, "", LocalDateTime.now(),
 			LocalDateTime.now(), null, "Clothes", false);
+	
+	private static MessagePayload  messagePayload = new MessagePayload( "1", "1", userId);
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -281,9 +283,10 @@ public class CampaignControllerTest {
 
 		Mockito.when(campaignService.findAllCampaignsByStoreId(campaign1.getStore().getStoreId(), "", pageable))
 				.thenReturn(mockCampaignMap);
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/campaigns/stores/{storeId}", store.getStoreId())
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/campaigns/stores", store.getStoreId())
 				.header("Authorization", authorizationHeader).param("page", "0").param("size", "10")
-				.contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(messagePayload)))
+				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data[0].campaignId").value(1))
 				.andDo(print());

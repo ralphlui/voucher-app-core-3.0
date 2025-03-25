@@ -107,9 +107,9 @@ public class CampaignController {
 		}
 	}
 
-	@GetMapping(value = "/stores/{storeId}", produces = "application/json")
+	@PostMapping(value = "/stores", produces = "application/json")
 	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllCampaignsByStoreId(
-			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("storeId") String storeId,
+			@RequestHeader("Authorization") String authorizationHeader, @RequestBody MessagePayload messagePayload,
 			@RequestParam(defaultValue = "") String status, @RequestParam(defaultValue = "") String description,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 		logger.info(
@@ -117,15 +117,15 @@ public class CampaignController {
 				authorizationHeader, status, description, page, size);
 
 		String activityType = "Campaign List by Store";
-		String endpoint = "/api/core/campaigns/stores/" + storeId;
-		HTTPVerb httpMethod = HTTPVerb.GET;
+		String endpoint = "/api/core/campaigns/stores" ;
+		HTTPVerb httpMethod = HTTPVerb.POST;
 		String message = "";
 		String userId = "Invalid UserID";
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
 
 		try {
 			 
-			storeId = GeneralUtility.makeNotNull(storeId).trim();
+			String storeId = GeneralUtility.makeNotNull(messagePayload.getStoreId()).trim();
 			if (storeId.isEmpty()) {
 				message = "Bad Request: Store ID could not be blank.";
 				logger.error(message);
