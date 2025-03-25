@@ -232,8 +232,9 @@ public class CampaignControllerTest {
 				.thenReturn(DTOMapper.toCampaignDTO(campaign1));
 
 		mockMvc.perform(MockMvcRequestBuilders
-				.patch("/api/core/campaigns/{campaignId}/users/{userId}/promote", campaign1.getCampaignId(), userId)
-				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON))
+				.post("/api/core/campaigns/promote")
+				.header("Authorization", authorizationHeader)
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(messagePayload)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.jsonPath("$.success").value(true)).andDo(print());

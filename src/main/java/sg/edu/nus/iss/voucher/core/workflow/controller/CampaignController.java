@@ -431,21 +431,23 @@ public class CampaignController {
 		}
 	}
 
-	@PatchMapping(value = "/{campaignId}/users/{userId}/promote", produces = "application/json")
+	@PostMapping(value = "/promote", produces = "application/json")
 	public ResponseEntity<APIResponse<CampaignDTO>> promoteCampaign(
-			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("campaignId") String campaignId,
-			@PathVariable("userId") String userId) {
+			@RequestHeader("Authorization") String authorizationHeader,  @RequestBody MessagePayload messagePayload) {
 		
 		logger.info("Calling Campaign Promote API...");
+		String activityType = "Promote Campaign";
+		String endpoint = "/api/core/campaigns/promote" ;
+		HTTPVerb httpMethod = HTTPVerb.POST;
+		String message = "";
+		String userId = "Invalid UserID";
+		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
 
 		
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, "Promote Campaign", activityTypePrefix,
-				"/api/core/campaigns/" + campaignId + "/users/" + userId + "/promote", HTTPVerb.PATCH);
-		String message = "";
-
+		
 		try {
-			
-			ValidationResult validationResult = campaignValidationStrategy.validateObject(campaignId);
+			userId=messagePayload.getUserId();
+			ValidationResult validationResult = campaignValidationStrategy.validateObject(messagePayload.getCampaignId());
 			if (!validationResult.isValid()) {
 				message = validationResult.getMessage();
 				logger.error(message);
@@ -464,7 +466,7 @@ public class CampaignController {
 				return ResponseEntity.status(validationResult.getStatus()).body(APIResponse.error(message));
 			}
 
-			CampaignDTO campaignDTO = campaignService.promote(campaignId, userId,authorizationHeader);
+			CampaignDTO campaignDTO = campaignService.promote(messagePayload.getCampaignId(), userId,authorizationHeader);
 			if (campaignDTO != null && campaignDTO.getCampaignId() != null) {
 				message = "Campaign has been promoted successfully.";
 				
