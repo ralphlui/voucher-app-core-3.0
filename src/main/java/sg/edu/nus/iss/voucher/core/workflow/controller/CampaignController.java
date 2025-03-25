@@ -188,17 +188,17 @@ public class CampaignController {
 		}
 	}
 
-	@GetMapping(value = "/users/{userId}", produces = "application/json")
+	@PostMapping(value = "/users", produces = "application/json")
 	public ResponseEntity<APIResponse<List<CampaignDTO>>> getCampaignsByUserId(
-			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("userId") String userId,
+			@RequestHeader("Authorization") String authorizationHeader, @RequestBody MessagePayload messagePayload,
 			@RequestParam(defaultValue = "") String description, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
 		long totalRecord = 0;
-		logger.info("Calling Campaign getAllCampaignsByEmail API with userId={}, description={}, page={}, size={}",
-				authorizationHeader, description, page, size);
+		logger.info("Calling Campaign getAllCampaignsByEmail API with  description={}, page={}, size={}",
+				 description, page, size);
 
 		String activityType = "Campaign List by User";
-		String endpoint = "/api/core/campaigns/users/" + userId;
+		String endpoint = "/api/core/campaigns/users";
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
 		String xUserId = "Invalid UserID";
@@ -207,7 +207,7 @@ public class CampaignController {
 
 		try {
 
-			userId = GeneralUtility.makeNotNull(userId).trim();
+			String userId = GeneralUtility.makeNotNull(messagePayload.getUserId()).trim();
 
 			if (!userId.equals("")) {
 				Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
@@ -259,13 +259,13 @@ public class CampaignController {
 		}
 	}
 
-	@GetMapping(value = "/{id}", produces = "application/json")
+	@PostMapping(value = "/Id", produces = "application/json")
 	public ResponseEntity<APIResponse<CampaignDTO>> getByCampaignId(
-			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
+			@RequestHeader("Authorization") String authorizationHeader, @RequestBody MessagePayload messagePayload) {
 
 		logger.info("Calling get Campaign API...");
 		String activityType = "Search Campaign by Id";
-		String endpoint = "/api/core/campaigns/" + id;
+		String endpoint = "/api/core/campaigns" ;
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
 		String userId = "Invalid UserID";
@@ -273,7 +273,7 @@ public class CampaignController {
 
 		try {
 			
-			String campaignId = GeneralUtility.makeNotNull(id).trim();
+			String campaignId = GeneralUtility.makeNotNull(messagePayload.getCampaignId()).trim();
 
 			if (!campaignId.equals("")) {
 
@@ -313,6 +313,7 @@ public class CampaignController {
 		}
 
 	}
+
 
 	@PostMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<CampaignDTO>> createCampaign(

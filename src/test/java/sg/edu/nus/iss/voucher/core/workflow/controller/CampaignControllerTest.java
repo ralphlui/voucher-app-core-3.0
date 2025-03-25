@@ -283,7 +283,7 @@ public class CampaignControllerTest {
 
 		Mockito.when(campaignService.findAllCampaignsByStoreId(campaign1.getStore().getStoreId(), "", pageable))
 				.thenReturn(mockCampaignMap);
-		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/campaigns/stores", store.getStoreId())
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/campaigns/stores")
 				.header("Authorization", authorizationHeader).param("page", "0").param("size", "10")
 				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(messagePayload)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
@@ -304,9 +304,10 @@ public class CampaignControllerTest {
 
 		Mockito.when(campaignService.findAllCampaignsByUserId(userId, "", pageable)).thenReturn(mockCampaignMap);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/campaigns/users/{userId}", userId)
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/campaigns/users")
 				.header("Authorization", authorizationHeader).param("page", String.valueOf(page))
-				.param("size", String.valueOf(size)).contentType(MediaType.APPLICATION_JSON))
+				.param("size", String.valueOf(size))
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(messagePayload)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.jsonPath("$.success").value(true))
@@ -318,8 +319,9 @@ public class CampaignControllerTest {
 
 		Mockito.when(campaignService.findByCampaignId(campaign1.getCampaignId()))
 				.thenReturn(DTOMapper.toCampaignDTO(campaign1));
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/campaigns/{id}", campaign1.getCampaignId())
-				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/campaigns/Id")
+				.header("Authorization", authorizationHeader)
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(messagePayload)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true)).andDo(print());
