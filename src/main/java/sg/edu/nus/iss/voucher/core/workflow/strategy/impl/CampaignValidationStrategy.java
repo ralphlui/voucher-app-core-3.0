@@ -11,13 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import sg.edu.nus.iss.voucher.core.workflow.dto.StoreDTO;
-import sg.edu.nus.iss.voucher.core.workflow.dto.ValidationResult;
+import sg.edu.nus.iss.voucher.core.workflow.dto.*;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Campaign;
 import sg.edu.nus.iss.voucher.core.workflow.enums.CampaignStatus;
-import sg.edu.nus.iss.voucher.core.workflow.service.impl.CampaignService;
-import sg.edu.nus.iss.voucher.core.workflow.service.impl.StoreService;
-import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
+import sg.edu.nus.iss.voucher.core.workflow.service.impl.*;
 import sg.edu.nus.iss.voucher.core.workflow.strategy.IAPIHelperValidationStrategy;
 import sg.edu.nus.iss.voucher.core.workflow.utility.GeneralUtility;
 
@@ -42,13 +39,6 @@ public class CampaignValidationStrategy implements IAPIHelperValidationStrategy<
 			validationResult.setValid(false);
 			return validationResult;
 		}
-		
-		/*if (campaign.getCategory() == null || campaign.getCategory().isEmpty()) {
-			validationResult.setMessage("Category cannot be empty.");
-			validationResult.setStatus(HttpStatus.BAD_REQUEST);
-			validationResult.setValid(false);
-			return validationResult;
-		}*/
 
 		if (campaign.getStore() == null || campaign.getStore().getStoreId().isEmpty()) {
 			validationResult.setMessage("Store Id cannot be empty.");

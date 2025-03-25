@@ -366,17 +366,17 @@ public class CampaignController {
 		}
 	}
 
-	@PutMapping(value = "/{id}", produces = "application/json")
+	@PostMapping(value = "/update", produces = "application/json")
 	public ResponseEntity<APIResponse<CampaignDTO>> updateCampaign(
-			@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id,
+			@RequestHeader("Authorization") String authorizationHeader,
 			@RequestBody Campaign campaign) {
 
 		logger.info("Calling Campaign update API...");
 
 		
 		String activityType = "Update Campaign";
-		String endpoint = "/api/core/campaigns/" + id;
-		HTTPVerb httpMethod = HTTPVerb.PUT;
+		String endpoint = "/api/core/campaigns/update" ;
+		HTTPVerb httpMethod = HTTPVerb.POST;
 		String message = "";
 		String userId = "Invalid UserID";
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
@@ -384,7 +384,7 @@ public class CampaignController {
 		try {
 			
 			
-			String campaignId = GeneralUtility.makeNotNull(id).trim();
+			String campaignId = GeneralUtility.makeNotNull(campaign.getCampaignId()).trim();
 
 			if (!campaignId.equals("")) {
 				campaign.setCampaignId(campaignId);
