@@ -75,7 +75,6 @@ public class DTOMapper {
 		campaignDTO.setCreatedDate(campaign.getCreatedDate());
 		campaignDTO.setUpdatedBy(campaign.getUpdatedBy());
 		campaignDTO.setUpdatedDate(campaign.getUpdatedDate());
-		campaignDTO.setCategory(campaign.getCategory());
 
 		if (campaign.getVoucher() != null) {
 			campaignDTO.setNumberOfClaimedVouchers(campaign.getVoucher().size());

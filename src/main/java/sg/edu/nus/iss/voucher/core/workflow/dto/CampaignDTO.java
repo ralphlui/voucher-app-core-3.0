@@ -27,7 +27,7 @@ public class CampaignDTO {
 	private LocalDateTime createdDate;
 	private LocalDateTime updatedDate;
     private int numberOfClaimedVouchers;
-    private String category;
+  
 
     public CampaignDTO(){
     }

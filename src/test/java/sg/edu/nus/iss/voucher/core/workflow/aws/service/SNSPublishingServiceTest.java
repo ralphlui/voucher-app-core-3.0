@@ -48,7 +48,6 @@ public class SNSPublishingServiceTest {
 		campaign = new Campaign();
 		campaign.setCampaignId("112");
 		campaign.setDescription("Test Campaign Description");
-		campaign.setCategory("Test Category");
 		campaign.setStore(store);
 	}
 
