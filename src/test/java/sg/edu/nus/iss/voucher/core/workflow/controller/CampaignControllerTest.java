@@ -207,7 +207,7 @@ public class CampaignControllerTest {
 		Mockito.when(campaignService.update(Mockito.any(Campaign.class)))
 				.thenReturn(DTOMapper.toCampaignDTO(campaign1));
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/campaigns/update")
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/core/campaigns/update")
 				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(campaign1))).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -246,7 +246,7 @@ public class CampaignControllerTest {
 				.thenReturn(DTOMapper.toCampaignDTO(campaign1));
 
 		mockMvc.perform(MockMvcRequestBuilders
-				.post("/api/core/campaigns/promote")
+				.patch("/api/core/campaigns/promote")
 				.header("Authorization", authorizationHeader)
 				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(messagePayload)))
 				.andExpect(MockMvcResultMatchers.status().isOk())

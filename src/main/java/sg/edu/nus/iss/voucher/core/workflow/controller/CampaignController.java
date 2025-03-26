@@ -15,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -363,7 +365,7 @@ public class CampaignController {
 		}
 	}
 
-	@PostMapping(value = "/update", produces = "application/json")
+	@PutMapping(value = "/update", produces = "application/json")
 	public ResponseEntity<APIResponse<CampaignDTO>> updateCampaign(
 			@RequestHeader("Authorization") String authorizationHeader,
 			@RequestBody Campaign campaign) {
@@ -373,7 +375,7 @@ public class CampaignController {
 		
 		String activityType = "Update Campaign";
 		String endpoint = "/api/core/campaigns/update" ;
-		HTTPVerb httpMethod = HTTPVerb.POST;
+		HTTPVerb httpMethod = HTTPVerb.PUT;
 		String message = "";
 		String userId = "Invalid UserID";
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
@@ -428,14 +430,14 @@ public class CampaignController {
 		}
 	}
 
-	@PostMapping(value = "/promote", produces = "application/json")
+	@PatchMapping(value = "/promote", produces = "application/json")
 	public ResponseEntity<APIResponse<CampaignDTO>> promoteCampaign(
 			@RequestHeader("Authorization") String authorizationHeader,  @RequestBody CampaignRequest messagePayload) {
 		
 		logger.info("Calling Campaign Promote API...");
 		String activityType = "Promote Campaign";
 		String endpoint = "/api/core/campaigns/promote" ;
-		HTTPVerb httpMethod = HTTPVerb.POST;
+		HTTPVerb httpMethod = HTTPVerb.PATCH;
 		String message = "";
 		String userId = "Invalid UserID";
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
