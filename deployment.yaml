@@ -6,7 +6,7 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      app: voucher-app-core template:
+      app: voucher-app-core
     metadata:
       labels:
         app: voucher-app-core
