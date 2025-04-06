@@ -35,8 +35,12 @@ public class AuditService implements IAuditService {
 	public void sendMessage(AuditDTO autAuditDTO, String authorizationHeader) {
 
 		try {
-			String jwtToken = authorizationHeader.substring(7);
+			String jwtToken ="";
 			String userName = "Invalid Username";
+			if(authorizationHeader.length()>0) {
+			 jwtToken = authorizationHeader.substring(7);
+			}
+			
 
 			if (!jwtToken.isEmpty()) {
 			   userName = Optional.ofNullable(jwtService.retrieveUserName(jwtToken))
@@ -65,7 +69,7 @@ public class AuditService implements IAuditService {
 	}
 	
 	public void logAudit(AuditDTO auditDTO,int stausCode, String message, String authorizationHeader) {
-	    logger.error(message);
+	    logger.info(message);
 	    auditDTO.setStatusCode(stausCode);
 	    if (stausCode ==200) {
 	    	  auditDTO.setResponseStatus(AuditResponseStatus.SUCCESS);

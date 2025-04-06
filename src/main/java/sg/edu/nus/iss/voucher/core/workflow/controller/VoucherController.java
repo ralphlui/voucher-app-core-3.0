@@ -280,7 +280,7 @@ public class VoucherController {
 		logger.info("Calling Voucher consume API...");
 		
 		String authHeaderUserId = jwtService.retrieveUserID(authorizationHeader);
-		AuditDTO auditDTO = auditService.createAuditDTO(authHeaderUserId, "Consume Voucher", activityTypePrefix,"/api/core/vouchers/"+voucherId+"/consume", HTTPVerb.PATCH);
+		AuditDTO auditDTO = auditService.createAuditDTO(authHeaderUserId, "Consume Voucher", activityTypePrefix,"/api/core/vouchers/consume", HTTPVerb.PATCH);
         String message="";
 
 		try {

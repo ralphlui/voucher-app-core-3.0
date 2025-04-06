@@ -263,7 +263,7 @@ public class CampaignControllerTest {
 
 		Mockito.when(campaignService.findAllActiveCampaigns("", pageable)).thenReturn(mockCampaignMap);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/campaigns").header("Authorization", authorizationHeader)
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/campaigns")
 				.param("page", "0").param("size", "10").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -282,7 +282,7 @@ public class CampaignControllerTest {
 		Mockito.when(campaignService.findAllActiveCampaigns(campaign1.getDescription(), pageable))
 				.thenReturn(mockCampaignMap);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/campaigns").header("Authorization", authorizationHeader)
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/campaigns")
 				.param("page", "0").param("size", "10").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))

@@ -53,11 +53,10 @@ public class CampaignController {
 
 	@GetMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllActiveCampaigns(
-			@RequestHeader("Authorization") String authorizationHeader,
 			@RequestParam(defaultValue = "") String description, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
-		logger.info("Calling Campaign getAllActiveCampaigns API with userId={}, description={}, page={}, size={}",
-				authorizationHeader, description, page, size);
+		logger.info("Calling Campaign getAllActiveCampaigns API with description={}, page={}, size={}",
+				description, page, size);
 
 		String activityType = "Active Campaign List";
 		String endpoint = "/api/core/campaigns";
@@ -84,7 +83,7 @@ public class CampaignController {
 				message = "Successfully retrieve all active campaigns.";
 
 				
-				auditService.logAudit(auditDTO, 200, message, authorizationHeader);
+				auditService.logAudit(auditDTO, 200, message,"");
 				return ResponseEntity.status(HttpStatus.OK)
 						.body(APIResponse.success(campaignDTOList, message, totalRecord));
 
@@ -92,7 +91,7 @@ public class CampaignController {
 				message = "There are no available campaign list.";
 				logger.error(message);
 				
-				auditService.logAudit(auditDTO, 200, message, authorizationHeader);
+				auditService.logAudit(auditDTO, 200, message,"");
 				return ResponseEntity.status(HttpStatus.OK).body(APIResponse.noList(campaignDTOList, message));
 			}
 
@@ -101,7 +100,7 @@ public class CampaignController {
 			message = "The attempt to retrieve all active campaigns was unsuccessful.";
 			auditDTO.setRemarks(ex.toString());
 			
-			auditService.logAudit(auditDTO, 500, message, authorizationHeader);
+			auditService.logAudit(auditDTO, 500, message,"");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
 		}
 	}
