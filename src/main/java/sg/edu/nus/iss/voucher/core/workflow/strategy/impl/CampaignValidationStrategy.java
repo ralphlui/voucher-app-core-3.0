@@ -109,7 +109,7 @@ public class CampaignValidationStrategy implements IAPIHelperValidationStrategy<
 		} else {
 			if (!dbCampaign.get().getCampaignStatus().equals(CampaignStatus.CREATED)) {
 				validationResult.setMessage(
-						"Campaign status has to be CREATED.Requested status :" + dbCampaign.get().getCampaignStatus());
+						"Campaign must be in CREATED status. Current requested status :" + dbCampaign.get().getCampaignStatus());
 				validationResult.setStatus(HttpStatus.BAD_REQUEST);
 				validationResult.setValid(false);
 				return validationResult;

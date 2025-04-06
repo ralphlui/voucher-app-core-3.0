@@ -50,7 +50,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		httpMethod = HTTPVerb.fromString(request.getMethod());
 		String requestURI = request.getRequestURI();
 
-		if (requestURI.contains("/api/core/campaigns") && httpMethod.equals(HTTPVerb.GET)) {
+		if (requestURI.equalsIgnoreCase("/api/core/campaigns") && httpMethod.equals(HTTPVerb.GET)) {
 			filterChain.doFilter(request, response);
 			return;
 		}

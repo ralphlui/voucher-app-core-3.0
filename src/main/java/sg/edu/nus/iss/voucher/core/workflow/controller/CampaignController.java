@@ -406,9 +406,12 @@ public class CampaignController {
 				} else {
 					message = validationResult.getMessage();
 					logger.error(message);
-					
-					auditService.logAudit(auditDTO, 404, message, authorizationHeader);
-					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error(message));
+					int status =404;
+					if(validationResult.getStatus().equals(HttpStatus.BAD_REQUEST)) {
+						status = 400;
+					}
+					auditService.logAudit(auditDTO, status, message, authorizationHeader);
+					return ResponseEntity.status(validationResult.getStatus()).body(APIResponse.error(message));
 				}
 			} else {
 				message = "Bad Request:Campaign ID could not be blank.";
