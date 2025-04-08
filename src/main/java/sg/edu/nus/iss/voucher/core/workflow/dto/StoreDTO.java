@@ -28,7 +28,4 @@ public class StoreDTO {
 	private String createdBy;
 	private String updatedBy;
 
-    public StoreDTO() {
-    }
-    
 }
