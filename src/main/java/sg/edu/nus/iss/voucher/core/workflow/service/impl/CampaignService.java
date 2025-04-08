@@ -29,6 +29,7 @@ import sg.edu.nus.iss.voucher.core.workflow.utility.*;
 public class CampaignService implements ICampaignService {
 
 	private static final Logger logger = LoggerFactory.getLogger(CampaignService.class);
+	private static final String CAMPAIGN_NOT_FOUND_MESSAGE = "Campaign not found...";
 	
 	@Autowired
 	private CampaignRepository campaignRepository;
@@ -67,7 +68,7 @@ public class CampaignService implements ICampaignService {
 			}
 
 		} else {
-			logger.info("Campaign not found...");
+			logger.info(CAMPAIGN_NOT_FOUND_MESSAGE);
 		}
 
 		result.put(totalRecord, campaignDTOList);
@@ -96,7 +97,7 @@ public class CampaignService implements ICampaignService {
 				campaignDTOList.add(DTOMapper.toCampaignDTO(campaign));
 			}
 		} else {
-			logger.info("Campaign not found...");
+			logger.info(CAMPAIGN_NOT_FOUND_MESSAGE);
 		}
 
 		result.put(totalRecord, campaignDTOList);
@@ -121,7 +122,7 @@ public class CampaignService implements ICampaignService {
 				campaignDTOList.add(DTOMapper.toCampaignDTO(campaign));
 			}
 		} else {
-			logger.info("Campaign not found...");
+			logger.info(CAMPAIGN_NOT_FOUND_MESSAGE);
 		}
 		result.put(totalRecord, campaignDTOList);
 		return result;
