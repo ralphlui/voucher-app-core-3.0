@@ -28,6 +28,8 @@ public class AuthAPICall {
     private String authURL;
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthAPICall.class);
+	private static final String GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG = "getSpecificActiveUsers exception... {}";
+
 	
 	public String validateActiveUser(String userId, String authorizationHeader) {
 	    String responseStr = "";
@@ -57,18 +59,18 @@ public class AuthAPICall {
 	            logger.info("getSpeicficActiveUsers: " + responseStr);
 	        } catch (Exception e) {
 	            e.printStackTrace();
-	            logger.error("getSpeicficActiveUsers exception... {}", e.toString());
+	            logger.error(GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG, e.toString());
 	        } finally {
 	            try {
 	                httpResponse.close();
 	            } catch (IOException e) {
 	                e.printStackTrace();
-	                logger.error("getSpeicficActiveUsers exception... {}", e.toString());
+	                logger.error(GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG, e.toString());
 	            }
 	        }
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
-	        logger.error("getSpeicficActiveUsers exception... {}", ex.toString());
+	        logger.error(GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG, ex.toString());
 	    }
 	    return responseStr;
 	}
