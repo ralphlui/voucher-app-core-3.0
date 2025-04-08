@@ -280,7 +280,6 @@ public class StoreController {
 
 	private ResponseEntity<APIResponse<StoreDTO>> handleResponseAndSendAudtiLogForSuccessCase(String userId,
 			String activityType, String endpoint, HTTPVerb httpVerb, String message, StoreDTO storeDTO, String authorizationHeader) {
-		logger.info(message);
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
 		auditService.logAudit(auditDTO, HttpStatus.OK.value(), message, authorizationHeader);
 		return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(storeDTO, message));
@@ -288,7 +287,6 @@ public class StoreController {
 
 	private ResponseEntity<APIResponse<StoreDTO>> handleResponseAndSendAudtiLogForFailureCase(String userId,
 			String activityType, String endpoint, HTTPVerb httpVerb, String message, HttpStatusCode htpStatuscode, String remark, String authorizationHeader) {
-		logger.error(message);
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
 		auditDTO.setRemarks(remark);
 		auditService.logAudit(auditDTO, htpStatuscode.value(), message, authorizationHeader);
