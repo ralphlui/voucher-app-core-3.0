@@ -31,17 +31,17 @@ public class AuthAPICall {
 	
 	public String validateActiveUser(String userId, String authorizationHeader) {
 	    String responseStr = "";
-	    
-	    CloseableHttpClient httpClient = HttpClients.createDefault();
-	    try {
+	    RequestConfig config = RequestConfig.custom()
+	            .setConnectTimeout(30000)
+	            .setConnectionRequestTimeout(30000)
+	            .setSocketTimeout(30000)
+	            .build();
+
+	    try (CloseableHttpClient httpClient = HttpClientBuilder.create()
+	            .setDefaultRequestConfig(config)
+	            .build()) {
 	         String url = authURL.trim()+"/active";
 	        logger.info("getSpeicficActiveUsers url : " + url);
-	        RequestConfig config = RequestConfig.custom()
-	                .setConnectTimeout(30000)
-	                .setConnectionRequestTimeout(30000)
-	                .setSocketTimeout(30000)
-	                .build();
-	        httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 	        HttpPost request = new HttpPost(url);
 	        request.setHeader("Authorization", authorizationHeader);
 	        request.setHeader("Content-Type", "application/json");
