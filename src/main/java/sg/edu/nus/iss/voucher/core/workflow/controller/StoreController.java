@@ -48,6 +48,7 @@ public class StoreController {
 
 	private static final Logger logger = LoggerFactory.getLogger(StoreController.class);
 	private static final String INVALID_USER_ID = "Invalid UserID";
+	private static final String API_CORE_STORES_ENDPOINT = "api/core/stores";
 
 
 	@Autowired
@@ -74,7 +75,7 @@ public class StoreController {
 			@RequestParam(defaultValue = "500") int size) {
 		logger.info("Call store getAll API with page={}, size={}", page, size);
 		String activityType = "GetAllActiveStoreList";
-		String endpoint = "/api/core/stores";
+		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
 		String userId = INVALID_USER_ID;
@@ -118,7 +119,7 @@ public class StoreController {
 		logger.info("Call store create API...");
 		String message = "";
 		String activityType = "CreatStore";
-		String endpoint = "api/core/stores";
+		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.POST;
 		String userid = INVALID_USER_ID;
 		
@@ -153,7 +154,7 @@ public class StoreController {
 
 		String message = "";
 		String activityType = "GetStoreById";
-		String endpoint = String.format("api/core/stores");
+		String endpoint = String.format(API_CORE_STORES_ENDPOINT);
 		HTTPVerb httpMethod = HTTPVerb.POST;
 		String userId = INVALID_USER_ID;
 
