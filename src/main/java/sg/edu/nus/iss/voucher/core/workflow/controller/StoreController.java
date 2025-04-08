@@ -257,7 +257,7 @@ public class StoreController {
 		logger.info("Call store updat API...");
 		String message = "";
 		String activityType = "UpdateStore";
-		String endpoint = "api/core/stores";
+		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.PUT;
 		String userid = INVALID_USER_ID;
 
