@@ -13,7 +13,4 @@ public class ValidationResult {
 	private String imageUrl;
 	private HttpStatus status;
 
-	public ValidationResult() {
-
-	}
 }

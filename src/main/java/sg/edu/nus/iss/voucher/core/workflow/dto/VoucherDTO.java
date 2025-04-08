@@ -18,8 +18,4 @@ public class VoucherDTO {
 	private LocalDateTime consumedTime;
 	private String claimedBy;
 
-    public VoucherDTO(){
-    	
-    }
-
 }
