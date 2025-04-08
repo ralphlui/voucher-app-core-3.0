@@ -74,39 +74,4 @@ public class AuthAPICall {
 	    }
 	    return responseStr;
 	}
-	
-	public String validateToken(String token) {
-		String responseStr = "";
-
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		try {
-			String url = authURL.trim() + "/validateToken";
-			logger.info("validate Access token url : " + url);
-			RequestConfig config = RequestConfig.custom().setConnectTimeout(30000).setConnectionRequestTimeout(30000)
-					.setSocketTimeout(30000).build();
-			httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-			HttpGet request = new HttpGet(url);
-			request.setHeader("Authorization", token);
-			CloseableHttpResponse httpResponse = httpClient.execute(request);
-			try {
-				byte[] responseByteArray = EntityUtils.toByteArray(httpResponse.getEntity());
-				responseStr = new String(responseByteArray, Charset.forName("UTF-8"));
-				logger.info("validate Access token: " + responseStr);
-			} catch (Exception e) {
-				e.printStackTrace();
-				logger.error("validate Access token exception... {}", e.toString());
-			} finally {
-				try {
-					httpResponse.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-					logger.error("validate Access token exception... {}", e.toString());
-				}
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			logger.error("validate Access token exception... {}", ex.toString());
-		}
-		return responseStr;
-	}
 }
