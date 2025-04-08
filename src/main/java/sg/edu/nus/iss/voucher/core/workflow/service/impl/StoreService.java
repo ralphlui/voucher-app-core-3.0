@@ -200,7 +200,7 @@ public class StoreService implements IStoreService {
 			if (updatedStore == null) {
 				throw new Exception("Store update failed: Unable to apply changes to the store:" + store.getStoreName());
 			}
-			logger.info("Updated successfully...{}", updatedStore.getStoreId());
+			logger.info("Updated successfully...");
 			storeDTO = DTOMapper.toStoreDTO(updatedStore);
 			return storeDTO;
 

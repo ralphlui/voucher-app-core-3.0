@@ -289,7 +289,7 @@ public class VoucherController {
 
 			if (voucherDTO != null && !voucherDTO.getVoucherStatus().equals(VoucherStatus.CLAIMED)) {
 				
-				logger.error("Voucher already consumed or not in a claimable state. Id: {}", voucherId);
+				logger.error("Voucher already consumed or not in a claimable state");
 				message ="Voucher has already been consumed.";
 				auditService.logAudit(auditDTO,401,message, authorizationHeader);
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -312,7 +312,7 @@ public class VoucherController {
 			}
 
 		} catch (Exception ex) {
-			logger.error("Exception during Voucher consume API call. Id: {}, Error: {}", voucherId, ex.getMessage());
+			logger.error("Exception during Voucher consume API call, Error");
 			HttpStatusCode htpStatuscode = ex instanceof VoucherNotFoundException ? HttpStatus.NOT_FOUND
 					: HttpStatus.INTERNAL_SERVER_ERROR;
 			message = "The attempt to consume the voucher has been unsuccessful.";
@@ -330,8 +330,8 @@ public class VoucherController {
 		logger.info("user Id key map "+ userMap.keySet());
 		
 		for (Map.Entry<Boolean, String> entry : userMap.entrySet()) {
-			logger.info("user role: " + entry.getValue());
-			logger.info("user id: " + entry.getKey());
+			logger.info("user role: ");
+			logger.info("user id: ");
 			
 			if (!entry.getKey()) {
 				String message = entry.getValue();
