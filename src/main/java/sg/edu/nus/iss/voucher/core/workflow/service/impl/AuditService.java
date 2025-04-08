@@ -69,7 +69,6 @@ public class AuditService implements IAuditService {
 	}
 	
 	public void logAudit(AuditDTO auditDTO,int stausCode, String message, String authorizationHeader) {
-	    logger.info(message);
 	    auditDTO.setStatusCode(stausCode);
 	    if (stausCode ==200) {
 	    	  auditDTO.setResponseStatus(AuditResponseStatus.SUCCESS);

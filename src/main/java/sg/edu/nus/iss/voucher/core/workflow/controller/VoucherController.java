@@ -176,7 +176,7 @@ public class VoucherController {
         String userId = voucherRequest.getClaimedBy();
         
 		try {
-			logger.info("Calling get Voucher by email API with status={}, page={}, size={}",status, page, size);
+			logger.info("Calling get Voucher by email API with status, page and size.");
 
 			if (!userId.equals("")) {
 

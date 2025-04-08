@@ -161,7 +161,6 @@ public class StoreController {
 		try {
 			userId = jwtService.retrieveUserID(authorizationHeader);
 			String storeId = GeneralUtility.makeNotNull(storeRequest.getStoreId()).trim();
-			logger.info("storeId: " + storeId);
 
 			if (storeId.isEmpty()) {
 				message = "Bad Request: Store Id could not be blank.";
@@ -208,14 +207,10 @@ public class StoreController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 			}
 
-			logger.info("UserId: " + userId);
 			HashMap<Boolean, String> userMap = userValidatorService.validateActiveUser(userId,
 					UserRoleType.MERCHANT.toString(), authorizationHeader);
-			logger.info("user Id key map " + userMap.keySet());
 
 			for (Map.Entry<Boolean, String> entry : userMap.entrySet()) {
-				logger.info("user role: " + entry.getValue());
-				logger.info("user id: " + entry.getKey());
 
 				if (!entry.getKey()) {
 					message = entry.getValue();
@@ -303,7 +298,6 @@ public class StoreController {
 	private ResponseEntity<APIResponse<List<StoreDTO>>> handleResponseListAndSendAuditLogForSuccessCase(String userId,
 			String activityType, String endpoint, HTTPVerb httpVerb, String message, List<StoreDTO> storeDTOList,
 			long totalRecord, String authorizationHeader) {
-		logger.info(message);
 		int httpStatusCode = HttpStatus.OK.value();
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
 		auditService.logAudit(auditDTO, httpStatusCode, message, authorizationHeader);
@@ -314,7 +308,6 @@ public class StoreController {
 	private ResponseEntity<APIResponse<List<StoreDTO>>> handleEmptyResponseListAndSendAuditLogForSuccessCase(
 			String userId, String activityType, String endpoint, HTTPVerb httpVerb, String message,
 			List<StoreDTO> storeDTOList, long totalRecord, String authorizationHeader) {
-		logger.info(message);
 		int httpStatusCode = HttpStatus.OK.value();
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
 		auditService.logAudit(auditDTO, httpStatusCode, message, authorizationHeader);

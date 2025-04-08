@@ -126,7 +126,7 @@ public class StoreService implements IStoreService {
 	public Store uploadImage(Store store, MultipartFile uploadFile) {
 		try {
 			if (!GeneralUtility.makeNotNull(uploadFile).equals("")) {
-				logger.info("create store: " + store.getStoreName() + "::" + uploadFile.getOriginalFilename());
+				logger.info("uploading image ....");
 				if (securityConfig != null) {
 
 					boolean isImageUploaded = ImageUploadToS3.checkImageExistBeforeUpload(s3Client, uploadFile,
