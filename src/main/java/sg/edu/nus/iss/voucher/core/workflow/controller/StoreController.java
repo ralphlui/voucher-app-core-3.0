@@ -47,6 +47,8 @@ import org.springframework.data.domain.*;
 public class StoreController {
 
 	private static final Logger logger = LoggerFactory.getLogger(StoreController.class);
+	private static final String INVALID_USER_ID = "Invalid UserID";
+
 
 	@Autowired
 	private StoreService storeService;
@@ -75,7 +77,7 @@ public class StoreController {
 		String endpoint = "/api/core/stores";
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
-		String userId = "Invalid UserID";
+		String userId = INVALID_USER_ID;
 
 		try {
             
@@ -118,7 +120,7 @@ public class StoreController {
 		String activityType = "CreatStore";
 		String endpoint = "api/core/stores";
 		HTTPVerb httpMethod = HTTPVerb.POST;
-		String userid = "Invalid UserID";
+		String userid = INVALID_USER_ID;
 		
 		try {
 		    userid = jwtService.retrieveUserID(authorizationHeader);
@@ -153,7 +155,7 @@ public class StoreController {
 		String activityType = "GetStoreById";
 		String endpoint = String.format("api/core/stores");
 		HTTPVerb httpMethod = HTTPVerb.POST;
-		String userId = "Invalid UserID";
+		String userId = INVALID_USER_ID;
 
 		try {
 			userId = jwtService.retrieveUserID(authorizationHeader);
@@ -193,7 +195,7 @@ public class StoreController {
 		String activityType = "GetAllStoreListByUserId";
 		String endpoint = String.format("api/core/stores/users");
 		HTTPVerb httpMethod = HTTPVerb.POST;
-		String authorizationUserID = "Invalid UserID";
+		String authorizationUserID = INVALID_USER_ID;
 
 		try {
 
@@ -256,7 +258,7 @@ public class StoreController {
 		String activityType = "UpdateStore";
 		String endpoint = "api/core/stores";
 		HTTPVerb httpMethod = HTTPVerb.PUT;
-		String userid = "Invalid UserID";
+		String userid = INVALID_USER_ID;
 
 		try {
 			userid = jwtService.retrieveUserID(authorizationHeader);
