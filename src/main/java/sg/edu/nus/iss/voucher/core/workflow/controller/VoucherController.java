@@ -1,6 +1,5 @@
 package sg.edu.nus.iss.voucher.core.workflow.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +26,6 @@ import io.jsonwebtoken.JwtException;
 import sg.edu.nus.iss.voucher.core.workflow.dto.*;
 import sg.edu.nus.iss.voucher.core.workflow.entity.*;
 import sg.edu.nus.iss.voucher.core.workflow.enums.HTTPVerb;
-import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.enums.VoucherStatus;
 import sg.edu.nus.iss.voucher.core.workflow.exception.CampaignNotFoundException;
 import sg.edu.nus.iss.voucher.core.workflow.exception.VoucherNotFoundException;
@@ -44,12 +42,6 @@ public class VoucherController {
 
 	@Autowired
 	private VoucherService voucherService;
-
-	@Autowired
-	private CampaignService campaignService;
-	
-	@Autowired
-	private UserValidatorService userValidatorService;
 	
 	@Autowired
 	private AuditService auditService;
@@ -117,17 +109,17 @@ public class VoucherController {
 			String campaignId = GeneralUtility.makeNotNull(voucherRequest.getCampaignId()).trim();
 			String claimBy = voucherRequest.getClaimedBy();
 
-			message = validateUser(claimBy, authorizationHeader);
+			message = voucherService.validateUser(claimBy, authorizationHeader);
 			if (!message.isEmpty()) {
 				auditService.logAudit(auditDTO,400,message,"");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 			}
 			
 			//Validate Campaign
-			Campaign campaign = validateCampaign(campaignId);
+			Campaign campaign = voucherService.validateCampaign(campaignId);
 
 			//Check if Voucher Already Claimed
-			if (isVoucherAlreadyClaimed(claimBy, campaign)) {
+			if (voucherService.isVoucherAlreadyClaimed(claimBy, campaign)) {
 				message = "Voucher has already been claimed.";
 				auditService.logAudit(auditDTO,400,message, authorizationHeader);
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -135,7 +127,7 @@ public class VoucherController {
 			}
 
 			//Check if Campaign is Fully Claimed
-			if (isCampaignFullyClaimed(campaignId, campaign)) {
+			if (voucherService.isCampaignFullyClaimed(campaignId, campaign)) {
 				message="Campaign has been fully claimed.";
 				auditService.logAudit(auditDTO,401,message, authorizationHeader);
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -324,48 +316,5 @@ public class VoucherController {
 		}
 	}
 
-	private String validateUser(String userId, String authorizationHeader) {
-
-		HashMap<Boolean, String> userMap = userValidatorService.validateActiveUser(userId, UserRoleType.CUSTOMER.toString(), authorizationHeader);
-		logger.info("user Id key map "+ userMap.keySet());
-		
-		for (Map.Entry<Boolean, String> entry : userMap.entrySet()) {
-			logger.info("user role: " + entry.getValue());
-			logger.info("user id: " + entry.getKey());
-			
-			if (!entry.getKey()) {
-				String message = entry.getValue();
-				logger.error(message);
-				return message;
-			}
-		}
-		return "";
-	}
-
-	// Validate Campaign
-	private Campaign validateCampaign(String campaignId) {
-		return campaignService.findById(campaignId)
-				.orElseThrow(() -> new CampaignNotFoundException("Campaign not found by campaignId: " + campaignId));
-	}
-
-	// Check if the voucher has already been claimed by this user
-	private boolean isVoucherAlreadyClaimed(String claimBy, Campaign campaign) {
-		VoucherDTO voucherDTO = voucherService.findVoucherByCampaignIdAndUserId(campaign, claimBy);
-		if (voucherDTO != null && voucherDTO.getVoucherId() != null && !voucherDTO.getVoucherId().isEmpty()) {
-			logger.error("Voucher already claimed.");
-			return true;
-		}
-		return false;
-	}
-
-	// Check if the campaign has already given out all its vouchers
-	private boolean isCampaignFullyClaimed(String campaignId, Campaign campaign) {
-		List<Voucher> claimedVoucherList = voucherService.findVoucherListByCampaignId(campaignId);
-		logger.info("claimedVoucherList: " + claimedVoucherList);
-		if (campaign.getNumberOfVouchers() <= claimedVoucherList.size()) {
-			logger.error("Campaign is fully claimed.");
-			return true;
-		}
-		return false;
-	}
+	
 }
