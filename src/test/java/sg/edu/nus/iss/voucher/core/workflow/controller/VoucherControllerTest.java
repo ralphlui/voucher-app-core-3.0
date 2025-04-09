@@ -122,11 +122,7 @@ public class VoucherControllerTest {
 		when(jwtService.validateToken(anyString(), eq(mockUserDetails))).thenReturn(true);
 
 		when(jwtService.getUserIdByAuthHeader(authorizationHeader)).thenReturn(userId);
-		ArgumentCaptor<AuditDTO> auditDTOCaptor = ArgumentCaptor.forClass(AuditDTO.class);
-
-		doNothing().when(auditService).logAudit(auditDTOCaptor.capture(), eq(200), eq("message"),
-				eq("authorizationHeader"));
-
+		
 		AuditDTO mockAuditDTO = new AuditDTO();
 
 		Mockito.when(auditService.createAuditDTO(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),

@@ -149,7 +149,7 @@ public class CampaignController {
 					
 					auditService.logAudit(auditDTO, 404, message, authorizationHeader);
 
-					throw ex;
+					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error(message));
 				}
 			}
 
