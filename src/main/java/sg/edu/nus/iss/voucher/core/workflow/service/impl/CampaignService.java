@@ -42,6 +42,9 @@ public class CampaignService implements ICampaignService {
 
 	@Autowired
 	private SNSPublishingService messagePublishService;
+	
+	private Random random = new Random();
+
 
 	@Override
 	public Map<Long, List<CampaignDTO>> findAllActiveCampaigns(String description,Pageable pageable) {
@@ -171,7 +174,7 @@ public class CampaignService implements ICampaignService {
 		try {
 
 			Store store = storeRepository.findById(campaign.getStore().getStoreId()).orElseThrow();
-			campaign.setPin(String.valueOf(new Random().nextInt(9000) + 1000));
+			campaign.setPin(String.valueOf(this.random.nextInt(9000) + 1000));
 			campaign.setCreatedBy(campaign.getCreatedBy());
 			campaign.setCreatedDate(LocalDateTime.now());
 			campaign.setStore(store);
