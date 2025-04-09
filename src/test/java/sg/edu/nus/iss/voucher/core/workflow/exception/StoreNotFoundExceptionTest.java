@@ -1,4 +1,4 @@
-package sg.edu.nus.iss.voucher.core.workflow;
+package sg.edu.nus.iss.voucher.core.workflow.exception;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +15,7 @@ public class StoreNotFoundExceptionTest {
 	@Test
     void testConstructor() {
         // Create an instance of StoreNotFoundException
-        String errorMessage = "User not found";
+        String errorMessage = "Store not found";
         StoreNotFoundException exception = new StoreNotFoundException(errorMessage);
 
         // Verify that the message is correctly set
