@@ -34,7 +34,6 @@ public class VoucherCoreSecurityConfig {
 		return frontEndUrl;
 	}
 
-
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http,JwtFilter jwtFilter) throws Exception {
 		return http.cors(cors -> cors.configurationSource(request -> {

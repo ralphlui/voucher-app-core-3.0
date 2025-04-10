@@ -18,7 +18,9 @@ import sg.edu.nus.iss.voucher.core.workflow.dto.VoucherDTO;
 import sg.edu.nus.iss.voucher.core.workflow.dto.VoucherRequest;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Campaign;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Voucher;
+import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.enums.VoucherStatus;
+import sg.edu.nus.iss.voucher.core.workflow.exception.CampaignNotFoundException;
 import sg.edu.nus.iss.voucher.core.workflow.exception.VoucherNotFoundException;
 import sg.edu.nus.iss.voucher.core.workflow.repository.CampaignRepository;
 import sg.edu.nus.iss.voucher.core.workflow.repository.VoucherRepository;
@@ -40,6 +42,12 @@ public class VoucherService implements IVoucherService {
 	@Autowired
 	AuthAPICall apiCall;
 	
+
+	@Autowired
+	private CampaignService campaignService;
+	
+	@Autowired
+	private UserValidatorService userValidatorService;
 	
 	@Override
 	public VoucherDTO findByVoucherId(String voucherId) throws Exception {
@@ -203,6 +211,52 @@ public class VoucherService implements IVoucherService {
 			logger.error("Voucher consuming exception... {}", ex.toString());
 			throw ex;
 		}
+	}
+	
+	
+	public String validateUser(String userId, String authorizationHeader) {
+
+		HashMap<Boolean, String> userMap = userValidatorService.validateActiveUser(userId, UserRoleType.CUSTOMER.toString(), authorizationHeader);
+		logger.info("user Id key map "+ userMap.keySet());
+		
+		for (Map.Entry<Boolean, String> entry : userMap.entrySet()) {
+			logger.info("user role: " + entry.getValue());
+			logger.info("user id: " + entry.getKey());
+			
+			if (!entry.getKey()) {
+				String message = entry.getValue();
+				logger.error(message);
+				return message;
+			}
+		}
+		return "";
+	}
+
+	// Validate Campaign
+	public Campaign validateCampaign(String campaignId) {
+		return campaignService.findById(campaignId)
+				.orElseThrow(() -> new CampaignNotFoundException("Campaign not found by campaignId: " + campaignId));
+	}
+
+	// Check if the voucher has already been claimed by this user
+	public boolean isVoucherAlreadyClaimed(String claimBy, Campaign campaign) {
+		VoucherDTO voucherDTO = findVoucherByCampaignIdAndUserId(campaign, claimBy);
+		if (voucherDTO != null && voucherDTO.getVoucherId() != null && !voucherDTO.getVoucherId().isEmpty()) {
+			logger.error("Voucher already claimed.");
+			return true;
+		}
+		return false;
+	}
+
+	// Check if the campaign has already given out all its vouchers
+	public boolean isCampaignFullyClaimed(String campaignId, Campaign campaign) {
+		List<Voucher> claimedVoucherList = findVoucherListByCampaignId(campaignId);
+		logger.info("claimedVoucherList: " + claimedVoucherList);
+		if (campaign.getNumberOfVouchers() <= claimedVoucherList.size()) {
+			logger.error("Campaign is fully claimed.");
+			return true;
+		}
+		return false;
 	}
 
 }

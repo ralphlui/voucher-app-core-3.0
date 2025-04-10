@@ -259,10 +259,11 @@ public class StoreController {
 		try {
 			userid = jwtService.retrieveUserID(authorizationHeader);
 			ValidationResult validationResult = storeValidationStrategy.validateUpdating(store, uploadFile, authorizationHeader);
-			if (!validationResult.isValid()) {
-				message = validationResult.getMessage();
-				return handleResponseAndSendAudtiLogForFailureCase(userid, activityType, endpoint, httpMethod, message,
-						validationResult.getStatus(), "", authorizationHeader);
+			if (validationResult == null || !validationResult.isValid()) {
+			    message = validationResult != null ? validationResult.getMessage() : "Validation failed: result is null";
+			    HttpStatus status = validationResult != null ? validationResult.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+			    return handleResponseAndSendAudtiLogForFailureCase(userid, activityType, endpoint, httpMethod, message,
+			            status, "", authorizationHeader);
 			}
 
 			StoreDTO storeDTO = storeService.updateStore(store, uploadFile);

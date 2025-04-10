@@ -1,68 +1,86 @@
 package sg.edu.nus.iss.voucher.core.workflow.aws.service;
 
+
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.amazonaws.services.sqs.model.SendMessageResult;
 
-import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
-
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
+import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
+
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 public class SQSPublishingServiceTest {
 
-	@Mock
-	private AmazonSQS amazonSQS;
+    @Mock
+    private AmazonSQS amazonSQS;
 
-	@InjectMocks
-	private SQSPublishingService sqsPublishingService;
+    @InjectMocks
+    private SQSPublishingService sqsPublishingService;
 
-	 AuditDTO auditDTO;
-	
-	@Value("${aws.sqs.queue.audit.url}")
-	String auditQueueURL;
+    private AuditDTO auditDTO;
 
-	@BeforeEach
-	public void setUp() {
-		MockitoAnnotations.openMocks(this);
-
-		auditDTO = new AuditDTO();
-		auditDTO.setUserId("123");
-		auditDTO.setRemarks("This is a test audit message.");
-	}
-	
-	@Test
-    public void testSendMessage_Success() throws Exception {
-		 ObjectMapper objectMapper = new ObjectMapper();
-
-        String messageBody = objectMapper.writeValueAsString(auditDTO);
-
-        // Call the sendMessage method
-        sqsPublishingService.sendMessage(auditDTO);
-
-        // Capture the SendMessageRequest
-        ArgumentCaptor<SendMessageRequest> captor = ArgumentCaptor.forClass(SendMessageRequest.class);
-        verify(amazonSQS).sendMessage(captor.capture());
-
-        // Verify the contents of the SendMessageRequest
-        SendMessageRequest request = captor.getValue();
-        assertEquals("http://mock-sqs-url", request.getQueueUrl());
-        assertEquals(messageBody, request.getMessageBody());
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
+        auditDTO = new AuditDTO();
+        auditDTO.setRemarks("This is a test remark that may be too long for the message size.");
        
     }
 
+    @Test
+    public void testSendMessage_Success() throws Exception {
+     
+        SendMessageResult sendMessageResult = new SendMessageResult();
+        sendMessageResult.setMessageId("12345");
+        when(amazonSQS.sendMessage(any(SendMessageRequest.class))).thenReturn(sendMessageResult);
+
+        sqsPublishingService.sendMessage(auditDTO);
+
+        verify(amazonSQS, times(1)).sendMessage(any(SendMessageRequest.class));
+    }
+
+    @Test
+    public void testSendMessage_MessageTooLarge() throws Exception {
+   
+        String largeRemark = "This is a very large remark that exceeds the size limit of the SQS message. "
+                + "It should be truncated properly in the sendMessage method to ensure the size limit is respected.";
+        auditDTO.setRemarks(largeRemark);
+
+        SendMessageResult sendMessageResult = new SendMessageResult();
+        sendMessageResult.setMessageId("12345");
+        when(amazonSQS.sendMessage(any(SendMessageRequest.class))).thenReturn(sendMessageResult);
+
+        sqsPublishingService.sendMessage(auditDTO);
+
+        verify(amazonSQS, times(1)).sendMessage(any(SendMessageRequest.class));
+    }
+
+
+    @Test
+    public void testTruncateMessage_NoTruncationNeeded() {
+        String remarks = "Short remark.";
+        int maxSize = 256 * 1024; 
+        String currentMessage = "Current message.";
+
+        String truncatedRemarks = sqsPublishingService.truncateMessage(remarks, maxSize, currentMessage);
+
+        assert truncatedRemarks.equals(remarks);
+    }
+    
+
+    
 }

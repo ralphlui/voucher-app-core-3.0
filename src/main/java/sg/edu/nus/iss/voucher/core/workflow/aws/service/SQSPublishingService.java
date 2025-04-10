@@ -62,7 +62,7 @@ public class SQSPublishingService {
 
 	public String truncateMessage(String remarks, int maxMessageSize, String currentMessage) {
 	    try {
-	        // Start truncating the remarks field only if it exceeds the limit
+	       
 	        byte[] currentMessageBytes = currentMessage.getBytes(StandardCharsets.UTF_8);
 	        int currentSize = currentMessageBytes.length;
 	        
@@ -73,7 +73,7 @@ public class SQSPublishingService {
 	        int diffMsgSize = currentSize - maxMessageSize;
 
 	        if (diffMsgSize >= remarkSize) {
-	            return ""; // If no space left for remarks, return an empty string
+	            return "";
 	        }	      
 	        
 	        int  allowedBytesForRemarks = remarkSize - (diffMsgSize+5);

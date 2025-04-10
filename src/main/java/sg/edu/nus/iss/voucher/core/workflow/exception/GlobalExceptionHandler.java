@@ -17,14 +17,6 @@ public class GlobalExceptionHandler {
 
 	 private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-	@ExceptionHandler(StoreNotFoundException.class)
-	public ResponseEntity<String> handleStoreNotFoundException(StoreNotFoundException ex) {
-
-		ex.printStackTrace();
-
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-	}
-
 	@SuppressWarnings("rawtypes")
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
