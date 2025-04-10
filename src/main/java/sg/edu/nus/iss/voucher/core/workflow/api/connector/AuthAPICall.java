@@ -10,13 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 
@@ -28,20 +26,22 @@ public class AuthAPICall {
     private String authURL;
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthAPICall.class);
+	private static final String GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG = "getSpecificActiveUsers exception... {}";
+
 	
 	public String validateActiveUser(String userId, String authorizationHeader) {
 	    String responseStr = "";
-	    
-	    CloseableHttpClient httpClient = HttpClients.createDefault();
-	    try {
+	    RequestConfig config = RequestConfig.custom()
+	            .setConnectTimeout(30000)
+	            .setConnectionRequestTimeout(30000)
+	            .setSocketTimeout(30000)
+	            .build();
+
+	    try (CloseableHttpClient httpClient = HttpClientBuilder.create()
+	            .setDefaultRequestConfig(config)
+	            .build()) {
 	         String url = authURL.trim()+"/active";
 	        logger.info("getSpeicficActiveUsers url : " + url);
-	        RequestConfig config = RequestConfig.custom()
-	                .setConnectTimeout(30000)
-	                .setConnectionRequestTimeout(30000)
-	                .setSocketTimeout(30000)
-	                .build();
-	        httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 	        HttpPost request = new HttpPost(url);
 	        request.setHeader("Authorization", authorizationHeader);
 	        request.setHeader("Content-Type", "application/json");
@@ -57,54 +57,19 @@ public class AuthAPICall {
 	            logger.info("getSpeicficActiveUsers: " + responseStr);
 	        } catch (Exception e) {
 	            e.printStackTrace();
-	            logger.error("getSpeicficActiveUsers exception... {}", e.toString());
+	            logger.error(GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG, e.toString());
 	        } finally {
 	            try {
 	                httpResponse.close();
 	            } catch (IOException e) {
 	                e.printStackTrace();
-	                logger.error("getSpeicficActiveUsers exception... {}", e.toString());
+	                logger.error(GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG, e.toString());
 	            }
 	        }
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
-	        logger.error("getSpeicficActiveUsers exception... {}", ex.toString());
+	        logger.error(GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG, ex.toString());
 	    }
 	    return responseStr;
-	}
-	
-	public String validateToken(String token) {
-		String responseStr = "";
-
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		try {
-			String url = authURL.trim() + "/validateToken";
-			logger.info("validate Access token url : " + url);
-			RequestConfig config = RequestConfig.custom().setConnectTimeout(30000).setConnectionRequestTimeout(30000)
-					.setSocketTimeout(30000).build();
-			httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-			HttpGet request = new HttpGet(url);
-			request.setHeader("Authorization", token);
-			CloseableHttpResponse httpResponse = httpClient.execute(request);
-			try {
-				byte[] responseByteArray = EntityUtils.toByteArray(httpResponse.getEntity());
-				responseStr = new String(responseByteArray, Charset.forName("UTF-8"));
-				logger.info("validate Access token: " + responseStr);
-			} catch (Exception e) {
-				e.printStackTrace();
-				logger.error("validate Access token exception... {}", e.toString());
-			} finally {
-				try {
-					httpResponse.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-					logger.error("validate Access token exception... {}", e.toString());
-				}
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			logger.error("validate Access token exception... {}", ex.toString());
-		}
-		return responseStr;
 	}
 }

@@ -29,6 +29,7 @@ import sg.edu.nus.iss.voucher.core.workflow.utility.*;
 public class CampaignService implements ICampaignService {
 
 	private static final Logger logger = LoggerFactory.getLogger(CampaignService.class);
+	private static final String CAMPAIGN_NOT_FOUND_MESSAGE = "Campaign not found...";
 	
 	@Autowired
 	private CampaignRepository campaignRepository;
@@ -41,6 +42,9 @@ public class CampaignService implements ICampaignService {
 
 	@Autowired
 	private SNSPublishingService messagePublishService;
+	
+	private Random random = new Random();
+
 
 	@Override
 	public Map<Long, List<CampaignDTO>> findAllActiveCampaigns(String description,Pageable pageable) {
@@ -67,7 +71,7 @@ public class CampaignService implements ICampaignService {
 			}
 
 		} else {
-			logger.info("Campaign not found...");
+			logger.info(CAMPAIGN_NOT_FOUND_MESSAGE);
 		}
 
 		result.put(totalRecord, campaignDTOList);
@@ -96,7 +100,7 @@ public class CampaignService implements ICampaignService {
 				campaignDTOList.add(DTOMapper.toCampaignDTO(campaign));
 			}
 		} else {
-			logger.info("Campaign not found...");
+			logger.info(CAMPAIGN_NOT_FOUND_MESSAGE);
 		}
 
 		result.put(totalRecord, campaignDTOList);
@@ -121,7 +125,7 @@ public class CampaignService implements ICampaignService {
 				campaignDTOList.add(DTOMapper.toCampaignDTO(campaign));
 			}
 		} else {
-			logger.info("Campaign not found...");
+			logger.info(CAMPAIGN_NOT_FOUND_MESSAGE);
 		}
 		result.put(totalRecord, campaignDTOList);
 		return result;
@@ -170,7 +174,7 @@ public class CampaignService implements ICampaignService {
 		try {
 
 			Store store = storeRepository.findById(campaign.getStore().getStoreId()).orElseThrow();
-			campaign.setPin(String.valueOf(new Random().nextInt(9000) + 1000));
+			campaign.setPin(String.valueOf(this.random.nextInt(9000) + 1000));
 			campaign.setCreatedBy(campaign.getCreatedBy());
 			campaign.setCreatedDate(LocalDateTime.now());
 			campaign.setStore(store);

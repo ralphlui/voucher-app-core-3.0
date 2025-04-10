@@ -33,7 +33,7 @@ public class SQSPublishingService {
 	        byte[] messageBytes = messageBody.getBytes(StandardCharsets.UTF_8);
 	        int messageSize = messageBytes.length;
 	        int maxMessageSize = 256 * 1024; ; // Max Size 256 KB in bytes
-	        logger.info("Serialized Audit Log JSON: " + messageBody);
+	        logger.info("Serialized Audit Log JSON");
 
 	        if (messageSize > maxMessageSize) {
 	            logger.warn("Message size exceeds the 256 KB limit: {} bytes, truncating remarks.", messageSize);
@@ -54,7 +54,7 @@ public class SQSPublishingService {
 	                .withDelaySeconds(5);
 
 	        amazonSQS.sendMessage(sendMsgRequest);
-	        logger.info("Message sent to SQS: {}", auditDTO);
+	        logger.info("Message sent to SQS");
 	    } catch (Exception e) {
 	        logger.error("Error sending message to SQS: {}", e);
 	    }

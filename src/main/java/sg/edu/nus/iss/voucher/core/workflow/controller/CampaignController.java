@@ -37,6 +37,8 @@ import sg.edu.nus.iss.voucher.core.workflow.utility.*;
 public class CampaignController {
 
 	private static final Logger logger = LoggerFactory.getLogger(CampaignController.class);
+	private static final String SORT_FIELD_START_DATE = "startDate";
+
 
 	@Autowired
 	private CampaignService campaignService;
@@ -68,7 +70,7 @@ public class CampaignController {
 
 		try {	
 
-			Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
+			Pageable pageable = PageRequest.of(page, size, Sort.by(SORT_FIELD_START_DATE).ascending());
 			Map<Long, List<CampaignDTO>> resultMap = campaignService.findAllActiveCampaigns(description, pageable);
 			List<CampaignDTO> campaignDTOList = new ArrayList<>();
 
@@ -132,7 +134,7 @@ public class CampaignController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 			}
 
-			Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
+			Pageable pageable = PageRequest.of(page, size, Sort.by(SORT_FIELD_START_DATE).ascending());
 			Map<Long, List<CampaignDTO>> resultMap;
 
 			if (status.isEmpty()) {
@@ -208,7 +210,7 @@ public class CampaignController {
 			String userId = GeneralUtility.makeNotNull(messagePayload.getUserId()).trim();
 
 			if (!userId.equals("")) {
-				Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
+				Pageable pageable = PageRequest.of(page, size, Sort.by(SORT_FIELD_START_DATE).ascending());
 
 				Map<Long, List<CampaignDTO>> resultMap = campaignService.findAllCampaignsByUserId(userId, description,
 						pageable);

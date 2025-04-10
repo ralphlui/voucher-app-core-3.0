@@ -47,6 +47,9 @@ import org.springframework.data.domain.*;
 public class StoreController {
 
 	private static final Logger logger = LoggerFactory.getLogger(StoreController.class);
+	private static final String INVALID_USER_ID = "Invalid UserID";
+	private static final String API_CORE_STORES_ENDPOINT = "api/core/stores";
+
 
 	@Autowired
 	private StoreService storeService;
@@ -72,10 +75,10 @@ public class StoreController {
 			@RequestParam(defaultValue = "500") int size) {
 		logger.info("Call store getAll API with page={}, size={}", page, size);
 		String activityType = "GetAllActiveStoreList";
-		String endpoint = "/api/core/stores";
+		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
-		String userId = "Invalid UserID";
+		String userId = INVALID_USER_ID;
 
 		try {
             
@@ -116,9 +119,9 @@ public class StoreController {
 		logger.info("Call store create API...");
 		String message = "";
 		String activityType = "CreatStore";
-		String endpoint = "api/core/stores";
+		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.POST;
-		String userid = "Invalid UserID";
+		String userid = INVALID_USER_ID;
 		
 		try {
 		    userid = jwtService.retrieveUserID(authorizationHeader);
@@ -151,14 +154,13 @@ public class StoreController {
 
 		String message = "";
 		String activityType = "GetStoreById";
-		String endpoint = String.format("api/core/stores");
+		String endpoint = String.format(API_CORE_STORES_ENDPOINT);
 		HTTPVerb httpMethod = HTTPVerb.POST;
-		String userId = "Invalid UserID";
+		String userId = INVALID_USER_ID;
 
 		try {
 			userId = jwtService.retrieveUserID(authorizationHeader);
 			String storeId = GeneralUtility.makeNotNull(storeRequest.getStoreId()).trim();
-			logger.info("storeId: " + storeId);
 
 			if (storeId.isEmpty()) {
 				message = "Bad Request: Store Id could not be blank.";
@@ -193,7 +195,7 @@ public class StoreController {
 		String activityType = "GetAllStoreListByUserId";
 		String endpoint = String.format("api/core/stores/users");
 		HTTPVerb httpMethod = HTTPVerb.POST;
-		String authorizationUserID = "Invalid UserID";
+		String authorizationUserID = INVALID_USER_ID;
 
 		try {
 
@@ -205,14 +207,10 @@ public class StoreController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 			}
 
-			logger.info("UserId: " + userId);
 			HashMap<Boolean, String> userMap = userValidatorService.validateActiveUser(userId,
 					UserRoleType.MERCHANT.toString(), authorizationHeader);
-			logger.info("user Id key map " + userMap.keySet());
 
 			for (Map.Entry<Boolean, String> entry : userMap.entrySet()) {
-				logger.info("user role: " + entry.getValue());
-				logger.info("user id: " + entry.getKey());
 
 				if (!entry.getKey()) {
 					message = entry.getValue();
@@ -254,9 +252,9 @@ public class StoreController {
 		logger.info("Call store updat API...");
 		String message = "";
 		String activityType = "UpdateStore";
-		String endpoint = "api/core/stores";
+		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.PUT;
-		String userid = "Invalid UserID";
+		String userid = INVALID_USER_ID;
 
 		try {
 			userid = jwtService.retrieveUserID(authorizationHeader);
@@ -282,7 +280,6 @@ public class StoreController {
 
 	private ResponseEntity<APIResponse<StoreDTO>> handleResponseAndSendAudtiLogForSuccessCase(String userId,
 			String activityType, String endpoint, HTTPVerb httpVerb, String message, StoreDTO storeDTO, String authorizationHeader) {
-		logger.info(message);
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
 		auditService.logAudit(auditDTO, HttpStatus.OK.value(), message, authorizationHeader);
 		return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(storeDTO, message));
@@ -290,7 +287,6 @@ public class StoreController {
 
 	private ResponseEntity<APIResponse<StoreDTO>> handleResponseAndSendAudtiLogForFailureCase(String userId,
 			String activityType, String endpoint, HTTPVerb httpVerb, String message, HttpStatusCode htpStatuscode, String remark, String authorizationHeader) {
-		logger.error(message);
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
 		auditDTO.setRemarks(remark);
 		auditService.logAudit(auditDTO, htpStatuscode.value(), message, authorizationHeader);
@@ -300,7 +296,6 @@ public class StoreController {
 	private ResponseEntity<APIResponse<List<StoreDTO>>> handleResponseListAndSendAuditLogForSuccessCase(String userId,
 			String activityType, String endpoint, HTTPVerb httpVerb, String message, List<StoreDTO> storeDTOList,
 			long totalRecord, String authorizationHeader) {
-		logger.info(message);
 		int httpStatusCode = HttpStatus.OK.value();
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
 		auditService.logAudit(auditDTO, httpStatusCode, message, authorizationHeader);
@@ -311,7 +306,6 @@ public class StoreController {
 	private ResponseEntity<APIResponse<List<StoreDTO>>> handleEmptyResponseListAndSendAuditLogForSuccessCase(
 			String userId, String activityType, String endpoint, HTTPVerb httpVerb, String message,
 			List<StoreDTO> storeDTOList, long totalRecord, String authorizationHeader) {
-		logger.info(message);
 		int httpStatusCode = HttpStatus.OK.value();
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
 		auditService.logAudit(auditDTO, httpStatusCode, message, authorizationHeader);

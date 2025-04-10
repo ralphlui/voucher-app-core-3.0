@@ -24,6 +24,7 @@ import sg.edu.nus.iss.voucher.core.workflow.enums.VoucherStatus;
 public class Voucher {
 
 	public Voucher() {
+		super();
 	}
 
 	@Id
