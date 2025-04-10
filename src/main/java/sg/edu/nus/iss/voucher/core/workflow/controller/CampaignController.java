@@ -53,6 +53,10 @@ public class CampaignController {
 	@Value("${audit.activity.type.prefix}")
 	String activityTypePrefix;
 
+	public static final String CAMPAIGNS_ENDPOINT = "/api/core/campaigns";
+	  public static final String INVALID_USER_ID = "Invalid UserID";
+	
+
 	@GetMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllActiveCampaigns(
 			@RequestParam(defaultValue = "") String description, @RequestParam(defaultValue = "0") int page,
@@ -61,12 +65,12 @@ public class CampaignController {
 				description, page, size);
 
 		String activityType = "Active Campaign List";
-		String endpoint = "/api/core/campaigns";
+		
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
-		String userId = "Invalid UserID";
+		
 
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
+		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix, CAMPAIGNS_ENDPOINT, httpMethod);
 
 		try {	
 
@@ -120,8 +124,8 @@ public class CampaignController {
 		String endpoint = "/api/core/campaigns/stores" ;
 		HTTPVerb httpMethod = HTTPVerb.POST;
 		String message = "";
-		String userId = "Invalid UserID";
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
+		
+		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix, endpoint, httpMethod);
 
 		try {
 			 
@@ -201,8 +205,8 @@ public class CampaignController {
 		String endpoint = "/api/core/campaigns/users";
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
-		String xUserId = "Invalid UserID";
-		AuditDTO auditDTO = auditService.createAuditDTO(xUserId, activityType, activityTypePrefix, endpoint,
+		
+		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix, endpoint,
 				httpMethod);
 
 		try {
@@ -265,11 +269,11 @@ public class CampaignController {
 
 		logger.info("Calling get Campaign API...");
 		String activityType = "Search Campaign by Id";
-		String endpoint = "/api/core/campaigns" ;
+		
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
-		String userId = "Invalid UserID";
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
+		
+		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix, CAMPAIGNS_ENDPOINT, httpMethod);
 
 		try {
 			
@@ -322,11 +326,11 @@ public class CampaignController {
 		logger.info("Calling Campaign create API...");
 
 		String activityType = "Create Campaign";
-		String endpoint = "/api/core/campaigns";
+		
 		HTTPVerb httpMethod = HTTPVerb.POST;
 		String message = "";
-		String userId = "Invalid UserID";
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
+		
+		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix, CAMPAIGNS_ENDPOINT, httpMethod);
 
 		try {
 		
@@ -378,8 +382,8 @@ public class CampaignController {
 		String endpoint = "/api/core/campaigns/update" ;
 		HTTPVerb httpMethod = HTTPVerb.PUT;
 		String message = "";
-		String userId = "Invalid UserID";
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
+		
+		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix, endpoint, httpMethod);
 
 		try {
 			
@@ -443,13 +447,13 @@ public class CampaignController {
 		String endpoint = "/api/core/campaigns/promote" ;
 		HTTPVerb httpMethod = HTTPVerb.PATCH;
 		String message = "";
-		String userId = "Invalid UserID";
-		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpMethod);
+		
+		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix, endpoint, httpMethod);
 
 		
 		
 		try {
-			userId=messagePayload.getUserId();
+			String userId=messagePayload.getUserId();
 			ValidationResult validationResult = campaignValidationStrategy.validateObject(messagePayload.getCampaignId());
 			if (!validationResult.isValid()) {
 				message = validationResult.getMessage();
