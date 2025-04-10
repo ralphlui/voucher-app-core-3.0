@@ -33,6 +33,8 @@ public class JWTService {
 
 	@Autowired
 	JSONReader jsonReader;
+	
+	public static final String USER_EMAIL = "userEmail";
 
 	public PublicKey loadPublicKey() throws Exception {
 		byte[] keyBytes = Base64.getDecoder().decode(jwtConfig.getJWTPubliceKey());
@@ -77,7 +79,7 @@ public class JWTService {
 	public Boolean validateToken(String token, UserDetails userDetails)
 			throws JwtException, IllegalArgumentException, Exception {
 		Claims claims = extractAllClaims(token);
-		String userEmail = claims.get("userEmail", String.class);
+		String userEmail = claims.get(USER_EMAIL, String.class);
 		return (userEmail.equals(userDetails.getUsername()) && !isTokenExpired(token));
 	}
 
@@ -137,10 +139,10 @@ public class JWTService {
 		try {
 			String token = authorizationHeader.substring(7);
 			Claims claims = extractAllClaims(token);
-			String email = claims.get("userEmail", String.class);
+			String email = claims.get(USER_EMAIL, String.class);
 			return email;
 		} catch (ExpiredJwtException e) {
-			return e.getClaims().get("userEmail", String.class);
+			return e.getClaims().get(USER_EMAIL, String.class);
 		} catch (Exception e) {
 			return "Invalid userEmail";
 		}
