@@ -61,8 +61,7 @@ public class CampaignController {
 	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllActiveCampaigns(
 			@RequestParam(defaultValue = "") String description, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
-		logger.info("Calling Campaign getAllActiveCampaigns API with description={}, page={}, size={}",
-				description, page, size);
+		logger.info("Calling Campaign getAllActiveCampaigns API" );
 
 		String activityType = "Active Campaign List";
 		
@@ -117,8 +116,7 @@ public class CampaignController {
 			@RequestParam(defaultValue = "") String status, @RequestParam(defaultValue = "") String description,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 		logger.info(
-				"Calling Campaign getAllCampaignsByStoreId API with userId={}, status={}, description={}, page={}, size={}",
-				authorizationHeader, status, description, page, size);
+				"Calling Campaign getAllCampaignsByStoreId API");
 
 		String activityType = "Campaign List by Store";
 		String endpoint = "/api/core/campaigns/stores" ;
@@ -198,8 +196,7 @@ public class CampaignController {
 			@RequestParam(defaultValue = "") String description, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
 		long totalRecord = 0;
-		logger.info("Calling Campaign getAllCampaignsByEmail API with  description={}, page={}, size={}",
-				 description, page, size);
+		logger.info("Calling Campaign getAllCampaignsByEmail API");
 
 		String activityType = "Campaign List by User";
 		String endpoint = "/api/core/campaigns/users";
