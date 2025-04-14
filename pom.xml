@@ -51,11 +51,7 @@
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-crypto</artifactId>
-			<version>6.4.2</version>
-		</dependency>
+		
 		<!-- AWS Core for credentials and region support -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
@@ -110,14 +106,6 @@
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope> <!-- Ensure it's in the test scope -->
-		</dependency>
-
-		<!--
-		https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
-		<dependency>
-			<groupId>com.googlecode.json-simple</groupId>
-			<artifactId>json-simple</artifactId>
-			<version>1.1.1</version>
 		</dependency>
 
 		<dependency>
