@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.hibernate.annotations.UuidGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -74,6 +76,7 @@ public class Store {
 	private boolean isDeleted;
 
 	@OneToMany(mappedBy = "campaignId")
+	@JsonIgnore
 	private List<Campaign> campaign;
 	
 	@Column(nullable = false)
