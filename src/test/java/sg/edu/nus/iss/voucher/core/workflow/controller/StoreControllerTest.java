@@ -35,6 +35,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -69,7 +70,7 @@ public class StoreControllerTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@MockBean
+	@MockitoBean
 	AuthAPICall apiCall;
 
 	@InjectMocks
@@ -78,16 +79,16 @@ public class StoreControllerTest {
 	@Mock
 	private StoreValidationStrategy storeValidationStrategy;
 
-	@MockBean
+	@MockitoBean
 	private StoreService storeService;
 
-	@MockBean
+	@MockitoBean
 	private UserValidatorService userValidatorService;
 
-	@MockBean
+	@MockitoBean
 	private JWTService jwtService;
 
-	@MockBean
+	@MockitoBean
 	private JSONReader jsonReader;
 
 	private static List<StoreDTO> mockStores = new ArrayList<>();

@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import sg.edu.nus.iss.voucher.core.workflow.aws.service.SNSPublishingService;
@@ -37,16 +38,16 @@ import sg.edu.nus.iss.voucher.core.workflow.service.impl.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CampaignServiceTest {
 
-	@MockBean
+	@MockitoBean
 	private CampaignRepository campaignRepository;
 
-	@MockBean
+	@MockitoBean
 	private StoreRepository storeRepository;	
 
 	@Autowired
 	private CampaignService campaignService;
 	
-	@MockBean
+	@MockitoBean
 	private SNSPublishingService messagePublishService;
 
 

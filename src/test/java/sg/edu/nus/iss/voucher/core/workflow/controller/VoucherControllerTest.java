@@ -34,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -63,28 +64,28 @@ public class VoucherControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@MockBean
+	@MockitoBean
 	private VoucherService voucherService;
 
-	@MockBean
+	@MockitoBean
 	private CampaignService campaignService;
 
-	@MockBean
+	@MockitoBean
 	private UserValidatorService userValidatorService;
 
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@MockBean
+	@MockitoBean
 	AuthAPICall apiCall;
 
-	@MockBean
+	@MockitoBean
 	private JWTService jwtService;
 
-	@MockBean
+	@MockitoBean
 	private JSONReader jsonReader;
 
-	@MockBean
+	@MockitoBean
 	private AuditService auditService;
 
 	private static List<VoucherDTO> mockVouchers = new ArrayList<>();

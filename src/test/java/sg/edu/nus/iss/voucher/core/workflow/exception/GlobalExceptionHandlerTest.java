@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,13 +40,13 @@ class GlobalExceptionHandlerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@MockBean
+	@MockitoBean
 	private JWTService jwtService;
 
-	@MockBean
+	@MockitoBean
 	private StoreNotFoundException storeNotFoundException;
 
-	@MockBean
+	@MockitoBean
 	private AuditService auditService;
 
 	@Test
