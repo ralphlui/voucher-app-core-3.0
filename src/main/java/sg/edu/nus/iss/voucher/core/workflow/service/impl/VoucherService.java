@@ -42,12 +42,15 @@ public class VoucherService implements IVoucherService {
 	@Autowired
 	AuthAPICall apiCall;
 	
-
-	@Autowired
-	private CampaignService campaignService;
 	
-	@Autowired
-	private UserValidatorService userValidatorService;
+	private final CampaignService campaignService;
+	private final UserValidatorService userValidatorService;
+	
+	public VoucherService(CampaignService campaignService,UserValidatorService userValidatorService) {
+		this.campaignService = campaignService;
+		this.userValidatorService = userValidatorService;
+	}
+	 
 	
 	@Override
 	public VoucherDTO findByVoucherId(String voucherId) throws Exception {

@@ -5,21 +5,22 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import sg.edu.nus.iss.voucher.core.workflow.api.connector.AuthAPICall;
 import sg.edu.nus.iss.voucher.core.workflow.pojo.User;
 
-
 @Component
 public class JSONReader {
 
-	@Autowired
-	AuthAPICall apiCall;
-	
+	private final AuthAPICall apiCall;
+
+	public JSONReader(AuthAPICall apiCall) {
+		this.apiCall = apiCall;
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(JSONReader.class);
-	
+
 	public JSONObject parseJsonResponse(String responseStr) throws ParseException {
 		if (responseStr == null || responseStr.isEmpty()) {
 			return null;
@@ -43,13 +44,13 @@ public class JSONReader {
 	public Boolean getSuccessFromResponse(JSONObject jsonResponse) {
 		return (Boolean) jsonResponse.get("success");
 	}
-	
+
 	public int getStatusFromResponse(JSONObject jsonResponse) {
 		Long status = (Long) jsonResponse.get("status");
 		return status.intValue();
 	}
-	
-	public JSONObject getActiveUser(String userId,String authorizationHeader) {
+
+	public JSONObject getActiveUser(String userId, String authorizationHeader) {
 
 		JSONObject jsonResponse = new JSONObject();
 
@@ -58,7 +59,7 @@ public class JSONReader {
 		try {
 
 			JSONParser parser = new JSONParser();
-		    jsonResponse = (JSONObject) parser.parse(responseStr);
+			jsonResponse = (JSONObject) parser.parse(responseStr);
 			return jsonResponse;
 
 		} catch (ParseException e) {
@@ -69,7 +70,7 @@ public class JSONReader {
 
 		return jsonResponse;
 	}
-	
+
 	public User getUserObject(JSONObject userJSONObject) {
 		User var = new User();
 		JSONObject data = getDataFromResponse(userJSONObject);
@@ -87,5 +88,5 @@ public class JSONReader {
 
 		return var;
 	}
-	
+
 }

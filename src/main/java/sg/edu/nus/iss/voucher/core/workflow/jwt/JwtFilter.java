@@ -1,6 +1,5 @@
 package sg.edu.nus.iss.voucher.core.workflow.jwt;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,11 +23,14 @@ import io.jsonwebtoken.*;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-	@Autowired
-	private JWTService jwtService;
+	private final JWTService jwtService;
+	
+	private final AuditService auditLogService;
 
-	@Autowired
-	private AuditService auditLogService;
+	public JwtFilter(JWTService jwtService,AuditService auditLogService) {
+		this.jwtService = jwtService;
+		this.auditLogService= auditLogService;
+	}
 
 	@Value("${audit.activity.type.prefix}")
 	String activityTypePrefix;

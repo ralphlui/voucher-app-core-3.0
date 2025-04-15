@@ -19,8 +19,11 @@ public class SNSPublishingService {
 	@Autowired
 	private AmazonSNS amazonSNSClient;
 
-	@Autowired
-	private JWTService jwtService;
+	private final JWTService jwtService;
+
+	public SNSPublishingService(JWTService jwtService) {
+		this.jwtService = jwtService;
+	}
 
 	@Value("${aws.sns.feed.topic.arn}")
 	String topicArn;
@@ -46,9 +49,9 @@ public class SNSPublishingService {
 		try {
 			email = jwtService.retrieveUserEmail(authorizationHeader);
 		} catch (Exception e) {
-			logger.info("Exception occurred while retrieve email:"+e.toString());
+			logger.info("Exception occurred while retrieve email:" + e.toString());
 			e.printStackTrace();
-			
+
 		}
 		//
 		jsonObjectMsg.put("email", email);

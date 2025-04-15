@@ -5,7 +5,6 @@ import java.util.function.Function;
 
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +27,12 @@ public class JWTService {
 	@Autowired
 	private JWTConfig jwtConfig;
 
-	@Autowired
-	ApplicationContext context;
+	private final JSONReader jsonReader;
 
-	@Autowired
-	JSONReader jsonReader;
-	
+	public JWTService( JSONReader jsonReader) {
+		this.jsonReader = jsonReader;
+	}
+
 	public static final String USER_EMAIL = "userEmail";
 
 	public PublicKey loadPublicKey() throws Exception {
@@ -56,21 +55,22 @@ public class JWTService {
 	public Claims extractAllClaims(String token) throws JwtException, IllegalArgumentException, Exception {
 		return Jwts.parser().verifyWith(loadPublicKey()).build().parseSignedClaims(token).getPayload();
 	}
-	
-	public UserDetails getUserDetail(String authorizationHeader,String token) throws JwtException, IllegalArgumentException, Exception {
+
+	public UserDetails getUserDetail(String authorizationHeader, String token)
+			throws JwtException, IllegalArgumentException, Exception {
 		String userID = extractUserID(token);
-		
+
 		JSONObject userJSONObjet = jsonReader.getActiveUser(userID, authorizationHeader);
 		Boolean success = jsonReader.getSuccessFromResponse(userJSONObjet);
 		String message = jsonReader.getMessageFromResponse(userJSONObjet);
-		
+
 		if (success) {
-			
+
 			User user = jsonReader.getUserObject(userJSONObjet);
 			UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
 					.password(user.getPassword()).roles(user.getRole().toString()).build();
 			return userDetails;
-			
+
 		} else {
 			throw new Exception(message);
 		}
@@ -135,7 +135,8 @@ public class JWTService {
 		return userID;
 	}
 
-	public String retrieveUserEmail(String authorizationHeader) throws JwtException, IllegalArgumentException, Exception {
+	public String retrieveUserEmail(String authorizationHeader)
+			throws JwtException, IllegalArgumentException, Exception {
 		try {
 			String token = authorizationHeader.substring(7);
 			Claims claims = extractAllClaims(token);
