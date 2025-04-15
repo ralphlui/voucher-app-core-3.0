@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import sg.edu.nus.iss.voucher.core.workflow.dto.VoucherDTO;
@@ -41,16 +42,16 @@ import sg.edu.nus.iss.voucher.core.workflow.service.impl.VoucherService;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class VoucherServiceTest {
 
-	@MockBean
+	@MockitoBean
 	private VoucherRepository voucherRepository;
 
 	@Autowired
 	private VoucherService voucherService;
 	
-	@MockBean
+	@MockitoBean
 	private CampaignRepository campaignRepository;
 	
-	@MockBean
+	@MockitoBean
 	private StoreRepository storeRepository;
 
 

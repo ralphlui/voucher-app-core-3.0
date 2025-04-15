@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import sg.edu.nus.iss.voucher.core.workflow.api.connector.AuthAPICall;
@@ -37,7 +38,7 @@ import sg.edu.nus.iss.voucher.core.workflow.service.impl.StoreService;
 @ActiveProfiles("test")
 public class StoreServiceTest {
 	
-	@MockBean
+	@MockitoBean
 	private StoreRepository storeRepository;
 
 
