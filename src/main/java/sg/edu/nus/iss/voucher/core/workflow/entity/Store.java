@@ -1,16 +1,12 @@
 package sg.edu.nus.iss.voucher.core.workflow.entity;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.hibernate.annotations.UuidGenerator;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -75,9 +71,6 @@ public class Store {
 	@Column(nullable = false, columnDefinition = "boolean default false")
 	private boolean isDeleted;
 
-	@OneToMany(mappedBy = "campaignId")
-	@JsonIgnore
-	private List<Campaign> campaign;
 	
 	@Column(nullable = false)
 	private String createdBy;
