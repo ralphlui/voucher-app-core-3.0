@@ -92,7 +92,7 @@ public class VoucherControllerTest {
 	private static Store store = new Store("1", "MUJI",
 			"MUJI offers a wide variety of good quality items from stationery to household items and apparel.", "Test",
 			"#04-36/40 Paragon Shopping Centre", "290 Orchard Rd", "", "238859", "Singapore", "Singapore", "Singapore",
-			null, null, null, null, false, null, "M1", "");
+			null, null, null, null, false, "M1", "");
 	private static Campaign campaign = new Campaign("1", "new campaign 1", store, CampaignStatus.CREATED, null, 10, 0,
 			null, null, 10, LocalDateTime.now(), LocalDateTime.now(), "U1", "", LocalDateTime.now(),
 			LocalDateTime.now(), null, false);

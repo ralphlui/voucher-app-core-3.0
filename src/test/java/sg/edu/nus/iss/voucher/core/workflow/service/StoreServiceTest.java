@@ -51,11 +51,11 @@ public class StoreServiceTest {
 	private static Store store = new Store("1", "MUJI",
 			"MUJI offers a wide variety of good quality items from stationery to household items and apparel.", "Test",
 			"#04-36/40 Paragon Shopping Centre", "290 Orchard Rd", "", "238859", "Singapore", "Singapore", "Singapore",
-			null, null, null, null, false, null, "US1", "");
+			null, null, null, null, false, "US1", "");
 	private static Store store2 = new Store("2", "Ikea",
 			"Ikea offers a wide variety of good quality items from stationery to household items and apparel.", "Test",
 			"#04-36/40 Paragon Shopping Centre", "290 Orchard Rd", "", "238859", "Singapore", "Singapore", "Singapore",
-			null, null, null, null, false, null, "US1", "");
+			null, null, null, null, false, "US1", "");
 
 	private static List<Store> mockStores = new ArrayList<>();
 

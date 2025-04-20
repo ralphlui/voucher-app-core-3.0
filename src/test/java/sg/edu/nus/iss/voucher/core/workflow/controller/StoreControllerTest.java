@@ -1,6 +1,5 @@
 package sg.edu.nus.iss.voucher.core.workflow.controller;
 
-import static org.hamcrest.CoreMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -24,7 +23,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -104,11 +102,11 @@ public class StoreControllerTest {
 		store1 = new Store("1", "MUJI",
 				"MUJI offers a wide variety of good quality items from stationery to household items and apparel.",
 				"Test", "#04-36/40 Paragon Shopping Centre", "290 Orchard Rd", "", "238859", "Singapore", "Singapore",
-				"Singapore", null, null, null, null, false, null, "423edfbf-ec17-471f-b45a-892a75fa9008", "");
+				"Singapore", null, null, null, null, false, "423edfbf-ec17-471f-b45a-892a75fa9008", "");
 		store2 = new Store("2", "SK",
 				"MUJI offers a wide variety of good quality items from stationery to household items and apparel.",
 				"Test", "#04-36/40 Paragon Shopping Centre", "290 Orchard Rd", "", "238859", "Singapore", "Singapore",
-				"Singapore", null, null, null, null, false, null, "", "");
+				"Singapore", null, null, null, null, false, "", "");
 
 		mockStores.add(DTOMapper.toStoreDTO(store1));
 		mockStores.add(DTOMapper.toStoreDTO(store2));

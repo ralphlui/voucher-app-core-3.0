@@ -75,9 +75,6 @@ public class Store {
 	@Column(nullable = false, columnDefinition = "boolean default false")
 	private boolean isDeleted;
 
-	@OneToMany(mappedBy = "campaignId")
-	@JsonIgnore
-	private List<Campaign> campaign;
 	
 	@Column(nullable = false)
 	private String createdBy;
