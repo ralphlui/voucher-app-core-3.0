@@ -59,6 +59,7 @@ public class JWTService {
 	public UserDetails getUserDetail(String authorizationHeader, String token)
 			throws JwtException, IllegalArgumentException, Exception {
 		String userID = extractUserID(token);
+		System.out.println("Extracted userID:   "+ userID);
 
 		JSONObject userJSONObjet = jsonReader.getActiveUser(userID, authorizationHeader);
 		Boolean success = jsonReader.getSuccessFromResponse(userJSONObjet);
