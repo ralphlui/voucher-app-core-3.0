@@ -4,8 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import sg.edu.nus.iss.voucher.core.workflow.exception.StoreNotFoundException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
