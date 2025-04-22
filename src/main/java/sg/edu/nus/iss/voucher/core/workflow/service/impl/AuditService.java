@@ -52,8 +52,7 @@ public class AuditService implements IAuditService {
 			sqsPublishingService.sendMessage(autAuditDTO);
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
 			logger.error("Error sending generateMessage to SQS: {}", e);
 		}
 

@@ -85,7 +85,7 @@ public class StoreService implements IStoreService {
 
 		} catch (Exception e) {
 			logger.error("Error occurred while user creating, " + e.toString());
-			e.printStackTrace();
+			
 			throw e;
 
 		}
@@ -141,7 +141,7 @@ public class StoreService implements IStoreService {
 			}
 		} catch (Exception e) {
 			logger.error("Error occurred while uploading Image, " + e.toString());
-			e.printStackTrace();
+			
 
 		}
 		return store;
@@ -206,7 +206,7 @@ public class StoreService implements IStoreService {
 
 		} catch (Exception ex) {
 			logger.error("Error occurred while user creating, " + ex.toString());
-			ex.printStackTrace();
+			
 			throw ex;
 		}
 

@@ -1,5 +1,6 @@
 package sg.edu.nus.iss.voucher.core.workflow.service.impl;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +44,7 @@ public class CampaignService implements ICampaignService {
 	@Autowired
 	private SNSPublishingService messagePublishService;
 	
-	private Random random = new Random();
+	private static final SecureRandom secureRandom = new SecureRandom();
 
 
 	@Override
@@ -174,7 +175,7 @@ public class CampaignService implements ICampaignService {
 		try {
 
 			Store store = storeRepository.findById(campaign.getStore().getStoreId()).orElseThrow();
-			campaign.setPin(String.valueOf(this.random.nextInt(9000) + 1000));
+			campaign.setPin(String.valueOf(secureRandom.nextInt(9000) + 1000));
 			campaign.setCreatedBy(campaign.getCreatedBy());
 			campaign.setCreatedDate(LocalDateTime.now());
 			campaign.setStore(store);

@@ -57,18 +57,18 @@ public class AuthAPICall {
 	            responseStr = new String(responseByteArray, Charset.forName("UTF-8"));
 	            logger.info("getSpeicficActiveUsers: " + responseStr);
 	        } catch (Exception e) {
-	            e.printStackTrace();
+	          
 	            logger.error(GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG, e.toString());
 	        } finally {
 	            try {
 	                httpResponse.close();
 	            } catch (IOException e) {
-	                e.printStackTrace();
+	               
 	                logger.error(GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG, e.toString());
 	            }
 	        }
 	    } catch (Exception ex) {
-	        ex.printStackTrace();
+	        
 	        logger.error(GET_SPECIFIC_ACTIVE_USERS_EXCEPTION_MSG, ex.toString());
 	    }
 	    return responseStr;

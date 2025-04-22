@@ -63,7 +63,7 @@ public class JSONReader {
 			return jsonResponse;
 
 		} catch (ParseException e) {
-			e.printStackTrace();
+			
 			logger.error("Error parsing JSON response for getActiveUserDetails... {}", e.toString());
 
 		}

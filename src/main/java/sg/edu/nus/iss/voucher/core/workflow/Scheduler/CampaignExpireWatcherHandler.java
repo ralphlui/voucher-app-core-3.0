@@ -27,7 +27,7 @@ public class CampaignExpireWatcherHandler {
 
 		} catch (Exception ex) {
 			logger.error("CampaignExpireWatcherHandler exception... {}", ex.toString());
-			ex.printStackTrace();
+			
 		}
 	}
 

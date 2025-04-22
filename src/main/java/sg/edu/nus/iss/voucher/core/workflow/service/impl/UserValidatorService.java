@@ -54,7 +54,7 @@ public class UserValidatorService {
 	        resultMap.put(success, message);
 
 	    } catch (ParseException e) {
-	        e.printStackTrace();
+	       
 	        logger.error("Error parsing JSON response... {}", e.toString());
 	    }
 
