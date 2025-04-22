@@ -63,13 +63,11 @@ public class JwtFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		logger.info("authorizationHeader:   "+ authorizationHeader);
 		String jwtToken = authorizationHeader.substring(7);
-		logger.info("JWT Token:   "+ jwtToken);
 
 		try {
 			userID = jwtService.retrieveUserID(authorizationHeader);
-			logger.info("Filter internal userID:   "+ userID);
+			
 			UserDetails userDetails = jwtService.getUserDetail(authorizationHeader, jwtToken);
 			if (jwtService.validateToken(jwtToken, userDetails)) {
 				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

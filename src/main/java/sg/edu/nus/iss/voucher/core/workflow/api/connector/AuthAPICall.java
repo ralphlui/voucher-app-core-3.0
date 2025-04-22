@@ -41,7 +41,7 @@ public class AuthAPICall {
 	            .setDefaultRequestConfig(config)
 	            .build()) {
 	         String url = authURL.trim()+"/active";
-	        logger.info("getSpeicficActiveUsers url : " + url);
+	        
 	        HttpPost request = new HttpPost(url);
 	        request.setHeader("Authorization", authorizationHeader);
 	        request.setHeader("Content-Type", "application/json");
@@ -49,11 +49,8 @@ public class AuthAPICall {
 	        // Set the JSON body (you can change this structure as needed)
 	        String jsonBody = "{\"userId\": \"" + userId + "\"}";
 	        request.setEntity(new StringEntity(jsonBody, ContentType.APPLICATION_JSON));
-	        logger.info(jsonBody);
-	        logger.info(request.toString());
-
-	        CloseableHttpResponse httpResponse = httpClient.execute(request);
-	        logger.info(httpResponse.toString());
+	        
+	        CloseableHttpResponse httpResponse = httpClient.execute(request);	       
 	        
 	        try {
 	            byte[] responseByteArray = EntityUtils.toByteArray(httpResponse.getEntity());
