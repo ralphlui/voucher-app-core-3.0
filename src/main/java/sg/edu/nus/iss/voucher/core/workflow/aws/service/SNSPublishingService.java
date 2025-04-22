@@ -49,8 +49,7 @@ public class SNSPublishingService {
 		try {
 			email = jwtService.retrieveUserEmail(authorizationHeader);
 		} catch (Exception e) {
-			logger.info("Exception occurred while retrieve email:" + e.toString());
-			e.printStackTrace();
+			 logger.info("Exception occurred while retrieving email: {}", e.toString(), e);
 
 		}
 		//

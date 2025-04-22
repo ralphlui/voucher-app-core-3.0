@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.function.Function;
 
 import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +23,15 @@ import java.util.Base64;
 @Service
 public class JWTService {
 
-	@Autowired
-	private JWTConfig jwtConfig;
+	
+	private final JWTConfig jwtConfig;
 
 	private final JSONReader jsonReader;
 
-	public JWTService( JSONReader jsonReader) {
+	public JWTService( JWTConfig jwtConfig,JSONReader jsonReader) {
+		this.jwtConfig = jwtConfig;
 		this.jsonReader = jsonReader;
+
 	}
 
 	public static final String USER_EMAIL = "userEmail";
@@ -63,17 +64,20 @@ public class JWTService {
 		JSONObject userJSONObjet = jsonReader.getActiveUser(userID, authorizationHeader);
 		Boolean success = jsonReader.getSuccessFromResponse(userJSONObjet);
 		String message = jsonReader.getMessageFromResponse(userJSONObjet);
-
+		
+		
 		if (success) {
-
-			User user = jsonReader.getUserObject(userJSONObjet);
-			UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
-					.password(user.getPassword()).roles(user.getRole().toString()).build();
-			return userDetails;
-
+		    User user = jsonReader.getUserObject(userJSONObjet);
+		    return org.springframework.security.core.userdetails.User
+		            .withUsername(user.getEmail())
+		            .password(user.getPassword())
+		            .roles(user.getRole().toString())
+		            .build();
 		} else {
-			throw new Exception(message);
+		    throw new Exception(message);
 		}
+
+		
 	}
 
 	public Boolean validateToken(String token, UserDetails userDetails)

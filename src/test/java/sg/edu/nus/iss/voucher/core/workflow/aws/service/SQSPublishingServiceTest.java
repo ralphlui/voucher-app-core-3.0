@@ -7,6 +7,7 @@ import com.amazonaws.services.sqs.model.SendMessageResult;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -42,7 +45,7 @@ public class SQSPublishingServiceTest {
     }
 
     @Test
-    public void testSendMessage_Success() throws Exception {
+    public void testSendMessageSuccess() throws Exception {
      
         SendMessageResult sendMessageResult = new SendMessageResult();
         sendMessageResult.setMessageId("12345");
@@ -54,7 +57,7 @@ public class SQSPublishingServiceTest {
     }
 
     @Test
-    public void testSendMessage_MessageTooLarge() throws Exception {
+    public void testMessageTooLarge() throws Exception {
    
         String largeRemark = "This is a very large remark that exceeds the size limit of the SQS message. "
                 + "It should be truncated properly in the sendMessage method to ensure the size limit is respected.";
@@ -69,18 +72,21 @@ public class SQSPublishingServiceTest {
         verify(amazonSQS, times(1)).sendMessage(any(SendMessageRequest.class));
     }
 
-
+    
     @Test
-    public void testTruncateMessage_NoTruncationNeeded() {
+    public void testNoTruncationNeeded() {
         String remarks = "Short remark.";
         int maxSize = 256 * 1024; 
         String currentMessage = "Current message.";
 
         String truncatedRemarks = sqsPublishingService.truncateMessage(remarks, maxSize, currentMessage);
 
-        assert truncatedRemarks.equals(remarks);
+        assertEquals("Remarks should not be truncated", remarks, truncatedRemarks);
+        
+        int totalLength = currentMessage.length() + truncatedRemarks.length();
+        assertTrue("Total message length should be within maxSize", totalLength <= maxSize);
     }
-    
+
 
     
 }
