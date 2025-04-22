@@ -32,6 +32,7 @@ public class VoucherCoreSecurityConfig {
 	public String getFrontEndUrl() {
 		return frontEndUrl;
 	}
+	
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http,JwtFilter jwtFilter) throws Exception {
@@ -48,7 +49,8 @@ public class VoucherCoreSecurityConfig {
 				.addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Headers", "*"))
 				.addHeaderWriter(new HstsHeaderWriter(31536000, false, true)).addHeaderWriter(
 						(request, response) -> response.addHeader("Cache-Control", "max-age=60, must-revalidate")))
-				.csrf(AbstractHttpConfigurer::disable)
+				// CSRF protection is disabled because JWT Bearer tokens are used for stateless authentication.
+		        .csrf(csrf -> csrf.disable()) // NOSONAR - CSRF is not required for JWT-based stateless authentication
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(
 						auth -> auth.requestMatchers(SECURED_URLS).permitAll().anyRequest().authenticated())
