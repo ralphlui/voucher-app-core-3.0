@@ -1,7 +1,6 @@
 package sg.edu.nus.iss.voucher.core.workflow.entity;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.hibernate.annotations.UuidGenerator;
 
@@ -13,7 +12,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -80,9 +78,6 @@ public class Campaign {
 	@Column(nullable = true, columnDefinition = "datetime")
 	private LocalDateTime updatedDate;
 
-	@OneToMany(mappedBy = "voucherId")
-	private List<Voucher> voucher;
-	
 	
 	@Column(nullable = false, columnDefinition = "boolean default false")
 	private boolean isDeleted;

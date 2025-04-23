@@ -1,5 +1,8 @@
 package sg.edu.nus.iss.voucher.core.workflow.utility;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import sg.edu.nus.iss.voucher.core.workflow.dto.*;
 import sg.edu.nus.iss.voucher.core.workflow.entity.*;
 
@@ -56,7 +59,7 @@ public class DTOMapper {
 		return storeDTO;
 	}
 
-	public static CampaignDTO toCampaignDTO(Campaign campaign) {
+	public static CampaignDTO toCampaignDTO(Campaign campaign, List<Voucher> voucher) {
 		CampaignDTO campaignDTO = new CampaignDTO();
 		campaignDTO.setCampaignId(campaign.getCampaignId());
 		campaignDTO.setDescription(campaign.getDescription());
@@ -76,16 +79,18 @@ public class DTOMapper {
 		campaignDTO.setUpdatedBy(campaign.getUpdatedBy());
 		campaignDTO.setUpdatedDate(campaign.getUpdatedDate());
 
-		if (campaign.getVoucher() != null) {
-			campaignDTO.setNumberOfClaimedVouchers(campaign.getVoucher().size());
+		if (voucher != null) {
+			campaignDTO.setNumberOfClaimedVouchers(voucher.size());
 		}
 		return campaignDTO;
 	}
 	
 	public static VoucherDTO toVoucherDTO(Voucher voucher) {
+		List<Voucher> voucherList = new ArrayList<>();
 		VoucherDTO voucherDTO = new VoucherDTO();
+		voucherList.add(voucher);
 		voucherDTO.setVoucherId(voucher.getVoucherId());
-		voucherDTO.setCampaign(toCampaignDTO(voucher.getCampaign()));
+		voucherDTO.setCampaign(toCampaignDTO(voucher.getCampaign(), voucherList));
 		voucherDTO.setVoucherStatus(voucher.getVoucherStatus());
 		voucherDTO.setClaimTime(voucher.getClaimTime());
 		voucherDTO.setConsumedTime(voucher.getConsumedTime());

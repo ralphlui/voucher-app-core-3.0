@@ -66,7 +66,7 @@ public class CampaignService implements ICampaignService {
 		if (totalRecord > 0) {
 			for (Campaign campaign : campaignPages.getContent()) {
 				
-				CampaignDTO campaignDTO = DTOMapper.toCampaignDTO(campaign);
+				CampaignDTO campaignDTO = DTOMapper.toCampaignDTO(campaign, null);
 				campaignDTOList.add(campaignDTO);
 			}
 
@@ -96,8 +96,8 @@ public class CampaignService implements ICampaignService {
 
 		if (totalRecord > 0) {
 			for (Campaign campaign : campaignPages) {
-				campaign.setVoucher(voucherRepository.findByCampaignCampaignId(campaign.getCampaignId()));
-				campaignDTOList.add(DTOMapper.toCampaignDTO(campaign));
+				List<Voucher> voucherList = voucherRepository.findByCampaignCampaignId(campaign.getCampaignId());
+				campaignDTOList.add(DTOMapper.toCampaignDTO(campaign, voucherList));
 			}
 		} else {
 			logger.info(CAMPAIGN_NOT_FOUND_MESSAGE);
@@ -121,8 +121,8 @@ public class CampaignService implements ICampaignService {
 		List<CampaignDTO> campaignDTOList = new ArrayList<>();
 		if (totalRecord > 0) {
 			for (Campaign campaign : campaignPages) {
-				campaign.setVoucher(voucherRepository.findByCampaignCampaignId(campaign.getCampaignId()));
-				campaignDTOList.add(DTOMapper.toCampaignDTO(campaign));
+				List<Voucher> voucherList = voucherRepository.findByCampaignCampaignId(campaign.getCampaignId());
+				campaignDTOList.add(DTOMapper.toCampaignDTO(campaign, voucherList));
 			}
 		} else {
 			logger.info(CAMPAIGN_NOT_FOUND_MESSAGE);
@@ -147,8 +147,8 @@ public class CampaignService implements ICampaignService {
 		List<CampaignDTO> campaignDTOList = new ArrayList<>();
 		if (totalRecord > 0) {
 			for (Campaign campaign : campaignPages) {
-				campaign.setVoucher(voucherRepository.findByCampaignCampaignId(campaign.getCampaignId()));
-				campaignDTOList.add(DTOMapper.toCampaignDTO(campaign));
+				List<Voucher> voucherList = voucherRepository.findByCampaignCampaignId(campaign.getCampaignId());
+				campaignDTOList.add(DTOMapper.toCampaignDTO(campaign, voucherList));
 			}
 		}
 		result.put(totalRecord, campaignDTOList);
@@ -161,8 +161,8 @@ public class CampaignService implements ICampaignService {
 		Campaign campaign = campaignRepository.findById(campaignId).orElse(null);
 		if (campaign != null) {
 			logger.info("Campaign found...");
-			campaign.setVoucher(voucherRepository.findByCampaignCampaignId(campaignId));
-			return DTOMapper.toCampaignDTO(campaign);
+			List<Voucher> voucherList = voucherRepository.findByCampaignCampaignId(campaignId);
+			return DTOMapper.toCampaignDTO(campaign, voucherList);
 		}
 		logger.warn("Didn't find any campaign for campaignId {}...", campaignId);
 		return null;
@@ -181,7 +181,7 @@ public class CampaignService implements ICampaignService {
 			logger.info("Saving campaign...");
 			Campaign savedCampaign = campaignRepository.save(campaign);
 			logger.info("Saved successfully...");
-			campaignDTO = DTOMapper.toCampaignDTO(savedCampaign);
+			campaignDTO = DTOMapper.toCampaignDTO(savedCampaign, null);
 
 		} catch (Exception ex) {
 			logger.error("Campaign saving exception... {}", ex.toString());
@@ -209,7 +209,7 @@ public class CampaignService implements ICampaignService {
 			logger.info("Update campaign...");
 			Campaign savedCampaign = campaignRepository.save(dbCampaign.get());
 			logger.info("Updated successfully...");
-			campaignDTO = DTOMapper.toCampaignDTO(savedCampaign);
+			campaignDTO = DTOMapper.toCampaignDTO(savedCampaign, null);
 
 		} catch (Exception ex) {
 			logger.error("Campaign updating exception... {}", ex.toString());
@@ -242,7 +242,7 @@ public class CampaignService implements ICampaignService {
 						dbCampaign.get().setUpdatedDate(LocalDateTime.now());
 						Campaign promottedCampaign = campaignRepository.save(dbCampaign.get());
 						logger.info("Promotted successfully...");
-						campaignDTO = DTOMapper.toCampaignDTO(promottedCampaign);
+						campaignDTO = DTOMapper.toCampaignDTO(promottedCampaign, null);
 						
 						messagePublishService.sendNotification(promottedCampaign,authorizationHeader);
 						logger.info("Feed generated successfully...");
