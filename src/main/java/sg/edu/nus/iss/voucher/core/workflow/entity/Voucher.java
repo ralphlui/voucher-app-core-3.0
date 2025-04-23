@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.UuidGenerator;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,7 +33,6 @@ public class Voucher {
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "campaignId")
-	@JsonBackReference
 	private Campaign campaign;
 
 	@Enumerated(EnumType.STRING)

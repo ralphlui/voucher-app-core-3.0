@@ -59,7 +59,7 @@ public class DTOMapper {
 		return storeDTO;
 	}
 
-	public static CampaignDTO toCampaignDTO(Campaign campaign, List<Voucher> voucher) {
+	public static CampaignDTO toCampaignDTO(Campaign campaign, List<Voucher> voucherList) {
 		CampaignDTO campaignDTO = new CampaignDTO();
 		campaignDTO.setCampaignId(campaign.getCampaignId());
 		campaignDTO.setDescription(campaign.getDescription());
@@ -79,8 +79,8 @@ public class DTOMapper {
 		campaignDTO.setUpdatedBy(campaign.getUpdatedBy());
 		campaignDTO.setUpdatedDate(campaign.getUpdatedDate());
 
-		if (voucher != null) {
-			campaignDTO.setNumberOfClaimedVouchers(voucher.size());
+		if (voucherList != null) {
+			campaignDTO.setNumberOfClaimedVouchers(voucherList.size());
 		}
 		return campaignDTO;
 	}
