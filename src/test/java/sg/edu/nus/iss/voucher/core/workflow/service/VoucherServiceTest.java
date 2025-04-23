@@ -60,7 +60,7 @@ public class VoucherServiceTest {
 			"#04-36/40 Paragon Shopping Centre", "290 Orchard Rd", "", "238859", "Singapore", "Singapore", "Singapore",
 			null, null, null, null, false, "M1", "");
 	private static Campaign campaign = new Campaign("1", "new voucher 1", store, CampaignStatus.CREATED, null, 0, 0,
-			null, null, 0, null, null, "US1", "US1", null, null, mockVouchers,  false);
+			null, null, 0, null, null, "US1", "US1", null, null,  false);
 	private static Voucher voucher1 = new Voucher("1", campaign, VoucherStatus.CLAIMED, LocalDateTime.now(), null,
 			"U1");
 	private static Voucher voucher2 = new Voucher("2", campaign, VoucherStatus.CLAIMED, LocalDateTime.now(), null,

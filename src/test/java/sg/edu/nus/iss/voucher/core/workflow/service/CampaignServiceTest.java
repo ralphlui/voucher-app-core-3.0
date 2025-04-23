@@ -61,10 +61,10 @@ public class CampaignServiceTest {
 
 	private static Campaign campaign1 = new Campaign("1", "new campaign 1", store, CampaignStatus.CREATED, null, 10, 0,
 			null, null, 10, LocalDateTime.now(), LocalDateTime.now(), userId, "", LocalDateTime.now(),
-			LocalDateTime.now(), null, false);
+			LocalDateTime.now(), false);
 	private static Campaign campaign2 = new Campaign("2", "new campaign 2", store, CampaignStatus.CREATED, null, 10, 0,
 			null, null, 10, LocalDateTime.now(), LocalDateTime.now(), userId, "", LocalDateTime.now(),
-			LocalDateTime.now(), null, false);
+			LocalDateTime.now(), false);
 
 
 	@BeforeAll

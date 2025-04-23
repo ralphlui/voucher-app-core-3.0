@@ -90,7 +90,7 @@ public class VoucherControllerTest {
 			null, null, null, null, false, "M1", "");
 	private static Campaign campaign = new Campaign("1", "new campaign 1", store, CampaignStatus.CREATED, null, 10, 0,
 			null, null, 10, LocalDateTime.now(), LocalDateTime.now(), "U1", "", LocalDateTime.now(),
-			LocalDateTime.now(), null, false);
+			LocalDateTime.now(), false);
 	private static Voucher voucher1;
 	private static Voucher voucher2 ;
 
