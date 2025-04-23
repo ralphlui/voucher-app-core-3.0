@@ -106,14 +106,14 @@ public class CampaignControllerTest {
 	void setUp() throws Exception {
 		 campaign1 = new Campaign("1", "new campaign 1", store, CampaignStatus.CREATED, null, 10, 0,
 					null, null, 10, LocalDateTime.now(), LocalDateTime.now(), userId, "", LocalDateTime.now(),
-					LocalDateTime.now(), null, false);
+					LocalDateTime.now(), false);
 		 campaign2 = new Campaign("2", "new campaign 2", store, CampaignStatus.CREATED, null, 10, 0,
 					null, null, 10, LocalDateTime.now(), LocalDateTime.now(), userId, "", LocalDateTime.now(),
-					LocalDateTime.now(), null,  false);
+					LocalDateTime.now(),  false);
 		 
 		messagePayload = new CampaignRequest( "1", "1", userId);
-		mockCampaigns.add(DTOMapper.toCampaignDTO(campaign1));
-		mockCampaigns.add(DTOMapper.toCampaignDTO(campaign2));
+		mockCampaigns.add(DTOMapper.toCampaignDTO(campaign1, null));
+		mockCampaigns.add(DTOMapper.toCampaignDTO(campaign2, null));
 
 		User mockUser = new User();
 		mockUser.setEmail("eleven.11@gmail.com");
@@ -168,7 +168,7 @@ public class CampaignControllerTest {
 	    Mockito.when(storeService.findByStoreId(store.getStoreId())).thenReturn(DTOMapper.toStoreDTO(store));
 
 	    Mockito.when(campaignService.create(Mockito.any(Campaign.class)))
-	            .thenReturn(DTOMapper.toCampaignDTO(campaign1));
+	            .thenReturn(DTOMapper.toCampaignDTO(campaign1, null));
 
 	  	
 
@@ -297,7 +297,7 @@ public class CampaignControllerTest {
         when(jsonReader.getMessageFromResponse(mockJsonResponse)).thenReturn(mockMessage);
 		
 		Mockito.when(campaignService.update(Mockito.any(Campaign.class)))
-				.thenReturn(DTOMapper.toCampaignDTO(campaign1));
+				.thenReturn(DTOMapper.toCampaignDTO(campaign1, null));
 
 		mockMvc.perform(MockMvcRequestBuilders.put("/api/core/campaigns/update")
 				.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON)
@@ -370,7 +370,7 @@ public class CampaignControllerTest {
 		
 		Mockito.when(campaignService.findById(campaign1.getCampaignId())).thenReturn(Optional.of(campaign1));
 		Mockito.when(campaignService.promote(campaign1.getCampaignId(), userId,authorizationHeader))
-				.thenReturn(DTOMapper.toCampaignDTO(campaign1));
+				.thenReturn(DTOMapper.toCampaignDTO(campaign1, null));
 
 		mockMvc.perform(MockMvcRequestBuilders
 				.patch("/api/core/campaigns/promote")
@@ -626,7 +626,7 @@ public class CampaignControllerTest {
 	void testGetByCampaignId() throws Exception {
 
 		Mockito.when(campaignService.findByCampaignId(campaign1.getCampaignId()))
-				.thenReturn(DTOMapper.toCampaignDTO(campaign1));
+				.thenReturn(DTOMapper.toCampaignDTO(campaign1, null));
 		mockMvc.perform(MockMvcRequestBuilders.post("/api/core/campaigns/Id")
 				.header("Authorization", authorizationHeader)
 				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(messagePayload)))
@@ -652,7 +652,7 @@ public class CampaignControllerTest {
 	void testGetByCampaignId_campaignNotFound() throws Exception {
 		
 	    Mockito.when(campaignService.findByCampaignId(campaign1.getCampaignId()))
-		.thenReturn(DTOMapper.toCampaignDTO(campaign2));
+		.thenReturn(DTOMapper.toCampaignDTO(campaign2, null));
 	    
 	    mockMvc.perform(MockMvcRequestBuilders.post("/api/core/campaigns/Id")
 	            .header("Authorization", authorizationHeader)
