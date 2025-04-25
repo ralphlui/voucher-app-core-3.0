@@ -15,9 +15,16 @@ public class DTOMapper {
 		storeDTO.setDescription(GeneralUtility.makeNotNull(store.getDescription()));
 
 		String address = GeneralUtility.makeNotNull(store.getAddress1()).trim();
-		address += address.isEmpty() ? "" : ", " + GeneralUtility.makeNotNull(store.getAddress2()).trim();
-		address += address.isEmpty() ? "" : ", " + GeneralUtility.makeNotNull(store.getAddress3()).trim();
-		address += address.isEmpty() ? "" : ", " + GeneralUtility.makeNotNull(store.getPostalCode());
+		if (!GeneralUtility.makeNotNull(store.getAddress1()).equals("")) {
+			address += address.isEmpty() ? "" : ", " + GeneralUtility.makeNotNull(store.getAddress2()).trim();
+		}
+		if (!GeneralUtility.makeNotNull(store.getAddress3()).equals("")) {
+			address += address.isEmpty() ? "" : ", " + GeneralUtility.makeNotNull(store.getAddress3()).trim();
+		}
+		if (!GeneralUtility.makeNotNull(store.getPostalCode()).equals("")) {
+			address += address.isEmpty() ? "" : ", " + GeneralUtility.makeNotNull(store.getPostalCode());
+
+		}
 
 		storeDTO.setAddress(GeneralUtility.makeNotNull(address));
 		storeDTO.setAddress1(store.getAddress1());
@@ -63,7 +70,7 @@ public class DTOMapper {
 		CampaignDTO campaignDTO = new CampaignDTO();
 		campaignDTO.setCampaignId(campaign.getCampaignId());
 		campaignDTO.setDescription(campaign.getDescription());
-		campaignDTO.setStore(toStoreDTO(campaign.getStore()));
+		campaignDTO.setStore(mapStoreToResult(campaign.getStore()));
 		campaignDTO.setCampaignStatus(campaign.getCampaignStatus());
 		campaignDTO.setTagsJson(campaign.getTagsJson());
 		campaignDTO.setNumberOfVouchers(campaign.getNumberOfVouchers());
@@ -84,7 +91,7 @@ public class DTOMapper {
 		}
 		return campaignDTO;
 	}
-	
+
 	public static VoucherDTO toVoucherDTO(Voucher voucher) {
 		List<Voucher> voucherList = new ArrayList<>();
 		VoucherDTO voucherDTO = new VoucherDTO();
