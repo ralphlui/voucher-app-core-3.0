@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 public class SearchRequest {
 
     
-    @Size(min = 3, max = 50, message = "Query must be between 3 and 50 characters")
+    @Size(min = 3, max = 10, message = "Query must be between 3 and 10 characters")
     private String query;
     
     private int page = 0;
@@ -34,8 +34,6 @@ public class SearchRequest {
 
 	public void setSize(int size) {
 		this.size = size;
-	}
-    
-    
+	} 
 
 }
