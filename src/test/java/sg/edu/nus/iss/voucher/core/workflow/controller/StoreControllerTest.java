@@ -44,13 +44,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import sg.edu.nus.iss.voucher.core.workflow.api.connector.AuthAPICall;
-import sg.edu.nus.iss.voucher.core.workflow.dto.SearchRequest;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreDTO;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreRequest;
 import sg.edu.nus.iss.voucher.core.workflow.dto.ValidationResult;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Store;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
+import sg.edu.nus.iss.voucher.core.workflow.search.SearchRequest;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.StoreService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
 import sg.edu.nus.iss.voucher.core.workflow.strategy.impl.StoreValidationStrategy;
