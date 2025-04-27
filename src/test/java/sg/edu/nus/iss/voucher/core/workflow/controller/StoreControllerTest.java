@@ -1,5 +1,6 @@
 package sg.edu.nus.iss.voucher.core.workflow.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -43,6 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import sg.edu.nus.iss.voucher.core.workflow.api.connector.AuthAPICall;
+import sg.edu.nus.iss.voucher.core.workflow.dto.SearchRequest;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreDTO;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreRequest;
 import sg.edu.nus.iss.voucher.core.workflow.dto.ValidationResult;
@@ -131,19 +133,26 @@ public class StoreControllerTest {
 		Pageable pageable = PageRequest.of(0, 10, Sort.by("storeName").ascending());
 		Map<Long, List<StoreDTO>> mockStoreMap = new HashMap<>();
 		mockStoreMap.put(0L, mockStores);
+		
+		SearchRequest searchRequest = new SearchRequest();
+        searchRequest.setQuery("MUJI");
+        searchRequest.setPage(0);
+        searchRequest.setSize(10);
 
 		Mockito.when(storeService.getAllActiveStoreList("", pageable)).thenReturn(mockStoreMap);
 
 		mockMvc.perform(
-				MockMvcRequestBuilders.get("/api/core/stores").param("query", "").param("page", "0").param("size", "10")
+				MockMvcRequestBuilders.get("/api/core/stores").param("page", String.valueOf(searchRequest.getPage()))
+                .param("size", String.valueOf(searchRequest.getSize()))
 						.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))
 				.andExpect(jsonPath("$.message").value("Successfully retrieved all active stores.")).andDo(print());
 
-		Mockito.when(storeService.getAllActiveStoreList("SK", pageable)).thenReturn(mockStoreMap);
+		Mockito.when(storeService.getAllActiveStoreList("MUJI", pageable)).thenReturn(mockStoreMap);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores").param("query", "SK").param("page", "0")
-				.param("size", "10").header("Authorization", authorizationHeader)
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores").param("query", searchRequest.getQuery())
+                .param("page", String.valueOf(searchRequest.getPage()))
+                .param("size", String.valueOf(searchRequest.getSize())).header("Authorization", authorizationHeader)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))
@@ -154,29 +163,36 @@ public class StoreControllerTest {
 		List<StoreDTO> emptyMockStores = new ArrayList<>();
 		Map<Long, List<StoreDTO>> emptyMockStoreMap = new HashMap<>();
 		emptyMockStoreMap.put(0L, emptyMockStores);
-		Mockito.when(storeService.getAllActiveStoreList("", pageable)).thenReturn(emptyMockStoreMap);
+		when(storeService.getAllActiveStoreList(anyString(), any(Pageable.class))).thenReturn(emptyMockStoreMap);
+	    searchRequest.setQuery("IKEA");
 
 		mockMvc.perform(
-				MockMvcRequestBuilders.get("/api/core/stores").param("query", "").param("page", "0").param("size", "10")
+				MockMvcRequestBuilders.get("/api/core/stores").param("query", searchRequest.getQuery()).param("page", String.valueOf(searchRequest.getPage())).param("size", String.valueOf(searchRequest.getSize()))
 						.header("Authorization", authorizationHeader).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.message").value("No Active Store List.")).andDo(print());
+				.andExpect(jsonPath("$.message").value("No stores found matching the search criteria " + searchRequest.getQuery())).andDo(print());
 
 	}
 	
 	@Test
 	void testGetAllActiveStore_ShouldReturnInternalServerError_WhenExceptionOccurs() throws Exception {
 	    Pageable pageable = PageRequest.of(0, 10, Sort.by("storeName").ascending());
+	    
+	    SearchRequest searchRequest = new SearchRequest();
+        searchRequest.setQuery("ikea");
+        searchRequest.setPage(0);
+        searchRequest.setSize(10);
+
 
 	    Mockito.when(storeService.getAllActiveStoreList("", pageable))
 	           .thenThrow(new RuntimeException("Simulated failure"));
 
 	    mockMvc.perform(MockMvcRequestBuilders.get("/api/core/stores")
-	            .param("query", "")
-	            .param("page", "0")
-	            .param("size", "10")
+	    		.param("query", searchRequest.getQuery())
+                .param("page", String.valueOf(searchRequest.getPage()))
+                .param("size", String.valueOf(searchRequest.getSize()))
 	            .header("Authorization", authorizationHeader)
 	            .contentType(MediaType.APPLICATION_JSON))
 	    		.andExpect(MockMvcResultMatchers.status().isInternalServerError())
