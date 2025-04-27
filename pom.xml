@@ -51,7 +51,7 @@
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		
+
 		<!-- AWS Core for credentials and region support -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
@@ -124,6 +124,23 @@
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
 			<version>0.12.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+			<artifactId>owasp-java-html-sanitizer</artifactId>
+			<version>20211018.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>8.0.1.Final</version>
+		</dependency>
+
+		<dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+			<version>3.0.2</version>
 		</dependency>
 
 	</dependencies>

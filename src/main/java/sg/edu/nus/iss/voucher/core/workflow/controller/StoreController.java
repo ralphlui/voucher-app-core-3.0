@@ -23,8 +23,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.Valid;
 import sg.edu.nus.iss.voucher.core.workflow.dto.APIResponse;
 import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
+import sg.edu.nus.iss.voucher.core.workflow.dto.SearchRequest;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreDTO;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreRequest;
 import sg.edu.nus.iss.voucher.core.workflow.dto.ValidationResult;
@@ -38,6 +40,7 @@ import sg.edu.nus.iss.voucher.core.workflow.service.impl.StoreService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
 import sg.edu.nus.iss.voucher.core.workflow.strategy.impl.StoreValidationStrategy;
 import sg.edu.nus.iss.voucher.core.workflow.utility.GeneralUtility;
+import sg.edu.nus.iss.voucher.core.workflow.utility.HtmlSanitizerUtil;
 
 import org.springframework.data.domain.*;
 
@@ -71,9 +74,8 @@ public class StoreController {
 	
 	@GetMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllActiveStoreList(@RequestHeader("Authorization") String authorizationHeader,
-			@RequestParam(defaultValue = "") String query, @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "500") int size) {
-		logger.info("Call store getAll API with page={}, size={}", page, size);
+			@Valid SearchRequest searchRequest) {
+		
 		String activityType = "GetAllActiveStoreList";
 		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.GET;
@@ -83,22 +85,26 @@ public class StoreController {
 		try {
             
 			userId = jwtService.retrieveUserID(authorizationHeader);
-			Pageable pageable = PageRequest.of(page, size, Sort.by("storeName").ascending());
-			Map<Long, List<StoreDTO>> resultMap = storeService.getAllActiveStoreList(query, pageable);
-			logger.info("size" + resultMap.size());
+			
+			String safeQuery = HtmlSanitizerUtil.sanitize(searchRequest.getQuery());
+			  
+			Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(), Sort.by("storeName").ascending());
+			
+			Map<Long, List<StoreDTO>> resultMap = storeService.getAllActiveStoreList(safeQuery, pageable);
+			logger.info("size" + resultMap.size());	  
 
 			Map.Entry<Long, List<StoreDTO>> firstEntry = resultMap.entrySet().iterator().next();
 			long totalRecord = firstEntry.getKey();
 			List<StoreDTO> storeDTOList = firstEntry.getValue();
 
 			if (storeDTOList.size() > 0) {
-				message = query.isEmpty() ? "Successfully retrieved all active stores."
+				message = GeneralUtility.makeNotNull(searchRequest.getQuery()).isEmpty() ? "Successfully retrieved all active stores."
 						: "Successfully retrieved the stores matching the search criteria.";
 				return handleResponseListAndSendAuditLogForSuccessCase(userId, activityType, endpoint, httpMethod,
 						message, storeDTOList, totalRecord, authorizationHeader);
 
 			} else {
-				message = query.isEmpty() ? "No Active Store List." : "No stores found matching the search criteria " + query;
+				message = searchRequest.getQuery().isEmpty() ? "No Active Store List." : "No stores found matching the search criteria " + searchRequest.getQuery();
 				;
 				return handleEmptyResponseListAndSendAuditLogForSuccessCase(userId, activityType, endpoint, httpMethod,
 						message, storeDTOList, totalRecord, authorizationHeader);

@@ -32,28 +32,40 @@ public class VoucherCoreSecurityConfig {
 		return frontEndUrl;
 	}
 	
-
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http,JwtFilter jwtFilter) throws Exception {
-		return http.cors(cors -> cors.configurationSource(request -> {
-			CorsConfiguration config = new CorsConfiguration();
-			config.setAllowedOrigins(List.of(frontEndUrl.trim()));
-			config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "OPTIONS"));
-			config.setAllowedHeaders(List.of("*"));
-			config.applyPermitDefaultValues();
-			return config;
-		})).headers(headers -> headers.addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "*"))
-				.addHeaderWriter(
-						new StaticHeadersWriter("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, OPTIONS"))
-				.addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Headers", "*"))
-				.addHeaderWriter(new HstsHeaderWriter(31536000, false, true)).addHeaderWriter(
-						(request, response) -> response.addHeader("Cache-Control", "max-age=60, must-revalidate")))
-				// CSRF protection is disabled because JWT Bearer tokens are used for stateless authentication.
-		        .csrf(csrf -> csrf.disable()) // NOSONAR - CSRF is not required for JWT-based stateless authentication
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(
-						auth -> auth.requestMatchers(SECURED_URLS).permitAll().anyRequest().authenticated())
-				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class).build();
+	public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
+	    return http
+	        .cors(cors -> {
+	            cors.configurationSource(request -> {
+	                CorsConfiguration config = new CorsConfiguration();
+	                config.setAllowedOrigins(List.of(frontEndUrl));
+	                config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "OPTIONS"));
+	                config.setAllowedHeaders(List.of("*"));
+	                config.setAllowCredentials(true);
+	                config.applyPermitDefaultValues();
+	                return config;
+	            });
+	        })
+	        .headers(headers -> headers
+	            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "*"))
+	            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, OPTIONS"))
+	            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Headers", "*"))
+	            .addHeaderWriter(new HstsHeaderWriter(31536000, false, true))
+	            .addHeaderWriter((request, response) -> 
+	                response.addHeader("Cache-Control", "max-age=60, must-revalidate")
+	            )
+	            .addHeaderWriter(new StaticHeadersWriter("Content-Security-Policy",
+	                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"))
+	        )
+	        // CSRF protection is disabled because JWT Bearer tokens are used for stateless authentication.
+			.csrf(csrf -> csrf.disable()) // NOSONAR - CSRF is not required for JWT-based stateless authentication
+	        .authorizeHttpRequests(auth -> auth
+	            .requestMatchers(SECURED_URLS).permitAll()
+	            .anyRequest().authenticated()
+	        )
+	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+	        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+	        .build();
 	}
 	
 
