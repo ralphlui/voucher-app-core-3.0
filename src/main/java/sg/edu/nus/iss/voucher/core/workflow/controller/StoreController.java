@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,7 +54,6 @@ public class StoreController {
 	private static final String INVALID_USER_ID = "Invalid UserID";
 	private static final String API_CORE_STORES_ENDPOINT = "api/core/stores";
 
-
 	@Autowired
 	private StoreService storeService;
 
@@ -65,46 +65,45 @@ public class StoreController {
 
 	@Autowired
 	private AuditService auditService;
-	
+
 	@Autowired
 	private JWTService jwtService;
 
 	@Value("${audit.activity.type.prefix}")
 	String activityTypePrefix;
-	
+
 	@GetMapping(value = "", produces = "application/json")
-	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllActiveStoreList(@RequestHeader("Authorization") String authorizationHeader,
-			@Valid SearchRequest searchRequest) {
-		
+	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllActiveStoreList(
+			@RequestHeader("Authorization") String authorizationHeader, @Valid SearchRequest searchRequest) {
+
 		String activityType = "GetAllActiveStoreList";
 		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
 		String userId = INVALID_USER_ID;
-
 		try {
-            
 			userId = jwtService.retrieveUserID(authorizationHeader);
-			
 			String safeQuery = HtmlSanitizerUtil.sanitize(searchRequest.getQuery());
-			  
-			Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(), Sort.by("storeName").ascending());
-			
+
+			Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(),
+					Sort.by("storeName").ascending());
 			Map<Long, List<StoreDTO>> resultMap = storeService.getAllActiveStoreList(safeQuery, pageable);
-			logger.info("size" + resultMap.size());	  
+			logger.info("size" + resultMap.size());
 
 			Map.Entry<Long, List<StoreDTO>> firstEntry = resultMap.entrySet().iterator().next();
 			long totalRecord = firstEntry.getKey();
 			List<StoreDTO> storeDTOList = firstEntry.getValue();
 
 			if (storeDTOList.size() > 0) {
-				message = GeneralUtility.makeNotNull(searchRequest.getQuery()).isEmpty() ? "Successfully retrieved all active stores."
+				message = GeneralUtility.makeNotNull(searchRequest.getQuery()).isEmpty()
+						? "Successfully retrieved all active stores."
 						: "Successfully retrieved the stores matching the search criteria.";
 				return handleResponseListAndSendAuditLogForSuccessCase(userId, activityType, endpoint, httpMethod,
 						message, storeDTOList, totalRecord, authorizationHeader);
 
 			} else {
-				message = searchRequest.getQuery().isEmpty() ? "No Active Store List." : "No stores found matching the search criteria " + searchRequest.getQuery();
+				message = searchRequest.getQuery().isEmpty() ? "No Active Store List."
+						: "No stores found matching the search criteria " + searchRequest.getQuery();
 				;
 				return handleEmptyResponseListAndSendAuditLogForSuccessCase(userId, activityType, endpoint, httpMethod,
 						message, storeDTOList, totalRecord, authorizationHeader);
@@ -112,8 +111,8 @@ public class StoreController {
 
 		} catch (Exception e) {
 			message = "The attempt to retrieve active store list was unsuccessful.";
-			return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
-					message, HttpStatus.INTERNAL_SERVER_ERROR, e.toString(), authorizationHeader);
+			return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod, message,
+					HttpStatus.INTERNAL_SERVER_ERROR, e.toString(), authorizationHeader);
 		}
 
 	}
@@ -128,10 +127,11 @@ public class StoreController {
 		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.POST;
 		String userid = INVALID_USER_ID;
-		
+
 		try {
-		    userid = jwtService.retrieveUserID(authorizationHeader);
-			ValidationResult validationResult = storeValidationStrategy.validateCreation(store, uploadFile, authorizationHeader);
+			userid = jwtService.retrieveUserID(authorizationHeader);
+			ValidationResult validationResult = storeValidationStrategy.validateCreation(store, uploadFile,
+					authorizationHeader);
 
 			if (validationResult.isValid()) {
 
@@ -154,8 +154,8 @@ public class StoreController {
 	}
 
 	@PostMapping(value = "/my-store", produces = "application/json")
-	public ResponseEntity<APIResponse<StoreDTO>> getStoreById( @RequestHeader("Authorization") String authorizationHeader,
-			@RequestBody StoreRequest storeRequest) {
+	public ResponseEntity<APIResponse<StoreDTO>> getStoreById(
+			@RequestHeader("Authorization") String authorizationHeader, @RequestBody StoreRequest storeRequest) {
 		logger.info("Call store getStoreById API...");
 
 		String message = "";
@@ -192,9 +192,9 @@ public class StoreController {
 	}
 
 	@PostMapping(value = "/users", produces = "application/json")
-	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllStoreByUser(@RequestHeader("Authorization") String authorizationHeader,
-			 @RequestBody StoreRequest storeRequest, @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "500") int size) {
+	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllStoreByUser(
+			@RequestHeader("Authorization") String authorizationHeader, @RequestBody StoreRequest storeRequest,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "500") int size) {
 
 		logger.info("Call store getAllByUser API with page={}, size={}", page, size);
 		String message = "";
@@ -220,8 +220,8 @@ public class StoreController {
 
 				if (!entry.getKey()) {
 					message = entry.getValue();
-					return handleResponseListAndSendAuditLogForFailuresCase(authorizationUserID, activityType, endpoint, httpMethod,
-							message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
+					return handleResponseListAndSendAuditLogForFailuresCase(authorizationUserID, activityType, endpoint,
+							httpMethod, message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
 				}
 			}
 
@@ -235,18 +235,18 @@ public class StoreController {
 
 			if (storeDTOList.size() > 0) {
 				message = "Successfully retrieved all active stores for the specified user.";
-				return handleResponseListAndSendAuditLogForSuccessCase(authorizationUserID, activityType, endpoint, httpMethod,
-						message, storeDTOList, totalRecord, authorizationHeader);
+				return handleResponseListAndSendAuditLogForSuccessCase(authorizationUserID, activityType, endpoint,
+						httpMethod, message, storeDTOList, totalRecord, authorizationHeader);
 			} else {
 				message = "No Active Store List.";
-				return handleEmptyResponseListAndSendAuditLogForSuccessCase(authorizationUserID, activityType, endpoint, httpMethod,
-						message, storeDTOList, totalRecord, authorizationHeader);
+				return handleEmptyResponseListAndSendAuditLogForSuccessCase(authorizationUserID, activityType, endpoint,
+						httpMethod, message, storeDTOList, totalRecord, authorizationHeader);
 			}
 
 		} catch (Exception e) {
 			message = "The attempt to retrieve the list of all active stores for the specified user was unsuccessful.";
-			return handleResponseListAndSendAuditLogForFailuresCase(authorizationUserID, activityType, endpoint, httpMethod, message,
-					HttpStatus.INTERNAL_SERVER_ERROR, e.toString(), authorizationHeader);
+			return handleResponseListAndSendAuditLogForFailuresCase(authorizationUserID, activityType, endpoint,
+					httpMethod, message, HttpStatus.INTERNAL_SERVER_ERROR, e.toString(), authorizationHeader);
 		}
 	}
 
@@ -264,12 +264,15 @@ public class StoreController {
 
 		try {
 			userid = jwtService.retrieveUserID(authorizationHeader);
-			ValidationResult validationResult = storeValidationStrategy.validateUpdating(store, uploadFile, authorizationHeader);
+			ValidationResult validationResult = storeValidationStrategy.validateUpdating(store, uploadFile,
+					authorizationHeader);
 			if (validationResult == null || !validationResult.isValid()) {
-			    message = validationResult != null ? validationResult.getMessage() : "Validation failed: result is null";
-			    HttpStatus status = validationResult != null ? validationResult.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-			    return handleResponseAndSendAudtiLogForFailureCase(userid, activityType, endpoint, httpMethod, message,
-			            status, "", authorizationHeader);
+				message = validationResult != null ? validationResult.getMessage()
+						: "Validation failed: result is null";
+				HttpStatus status = validationResult != null ? validationResult.getStatus()
+						: HttpStatus.INTERNAL_SERVER_ERROR;
+				return handleResponseAndSendAudtiLogForFailureCase(userid, activityType, endpoint, httpMethod, message,
+						status, "", authorizationHeader);
 			}
 
 			StoreDTO storeDTO = storeService.updateStore(store, uploadFile);
@@ -278,7 +281,7 @@ public class StoreController {
 					storeDTO, authorizationHeader);
 		} catch (Exception e) {
 			message = "The attempt to update store was unsuccessful.";
-				logger.error(message);
+			logger.error(message);
 			return handleResponseAndSendAudtiLogForFailureCase(userid, activityType, endpoint, httpMethod, message,
 					HttpStatus.INTERNAL_SERVER_ERROR, e.toString(), authorizationHeader);
 		}
@@ -286,14 +289,16 @@ public class StoreController {
 	}
 
 	private ResponseEntity<APIResponse<StoreDTO>> handleResponseAndSendAudtiLogForSuccessCase(String userId,
-			String activityType, String endpoint, HTTPVerb httpVerb, String message, StoreDTO storeDTO, String authorizationHeader) {
+			String activityType, String endpoint, HTTPVerb httpVerb, String message, StoreDTO storeDTO,
+			String authorizationHeader) {
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
 		auditService.logAudit(auditDTO, HttpStatus.OK.value(), message, authorizationHeader);
 		return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(storeDTO, message));
 	}
 
 	private ResponseEntity<APIResponse<StoreDTO>> handleResponseAndSendAudtiLogForFailureCase(String userId,
-			String activityType, String endpoint, HTTPVerb httpVerb, String message, HttpStatusCode htpStatuscode, String remark, String authorizationHeader) {
+			String activityType, String endpoint, HTTPVerb httpVerb, String message, HttpStatusCode htpStatuscode,
+			String remark, String authorizationHeader) {
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
 		auditDTO.setRemarks(remark);
 		auditService.logAudit(auditDTO, htpStatuscode.value(), message, authorizationHeader);
@@ -321,7 +326,8 @@ public class StoreController {
 	}
 
 	private ResponseEntity<APIResponse<List<StoreDTO>>> handleResponseListAndSendAuditLogForFailuresCase(String userId,
-			String activityType, String endpoint, HTTPVerb httpVerb, String message, HttpStatusCode htpStatuscode, String remark, String authorizationHeader) {
+			String activityType, String endpoint, HTTPVerb httpVerb, String message, HttpStatusCode htpStatuscode,
+			String remark, String authorizationHeader) {
 		logger.info(message);
 		int httpStatusCode = htpStatuscode.value();
 		AuditDTO auditDTO = auditService.createAuditDTO(userId, activityType, activityTypePrefix, endpoint, httpVerb);
