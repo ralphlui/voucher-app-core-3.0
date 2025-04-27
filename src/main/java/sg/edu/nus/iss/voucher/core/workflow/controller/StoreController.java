@@ -11,23 +11,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import sg.edu.nus.iss.voucher.core.workflow.dto.APIResponse;
 import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
-import sg.edu.nus.iss.voucher.core.workflow.dto.SearchRequest;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreDTO;
 import sg.edu.nus.iss.voucher.core.workflow.dto.StoreRequest;
 import sg.edu.nus.iss.voucher.core.workflow.dto.ValidationResult;
@@ -36,6 +26,7 @@ import sg.edu.nus.iss.voucher.core.workflow.enums.HTTPVerb;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.exception.StoreNotFoundException;
 import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
+import sg.edu.nus.iss.voucher.core.workflow.search.SearchRequest;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.AuditService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.StoreService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
@@ -75,7 +66,6 @@ public class StoreController {
 	@GetMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllActiveStoreList(
 			@RequestHeader("Authorization") String authorizationHeader, @Valid SearchRequest searchRequest) {
-
 		String activityType = "GetAllActiveStoreList";
 		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.GET;
@@ -104,7 +94,6 @@ public class StoreController {
 			} else {
 				message = searchRequest.getQuery().isEmpty() ? "No Active Store List."
 						: "No stores found matching the search criteria " + searchRequest.getQuery();
-				;
 				return handleEmptyResponseListAndSendAuditLogForSuccessCase(userId, activityType, endpoint, httpMethod,
 						message, storeDTOList, totalRecord, authorizationHeader);
 			}
@@ -194,9 +183,8 @@ public class StoreController {
 	@PostMapping(value = "/users", produces = "application/json")
 	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllStoreByUser(
 			@RequestHeader("Authorization") String authorizationHeader, @RequestBody StoreRequest storeRequest,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "500") int size) {
-
-		logger.info("Call store getAllByUser API with page={}, size={}", page, size);
+			 @Valid SearchRequest searchRequest) {
+  
 		String message = "";
 		String activityType = "GetAllStoreListByUserId";
 		String endpoint = String.format("api/core/stores/users");
@@ -225,7 +213,7 @@ public class StoreController {
 				}
 			}
 
-			Pageable pageable = PageRequest.of(page, size, Sort.by("storeName").ascending());
+			Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(), Sort.by("storeName").ascending());
 			Map<Long, List<StoreDTO>> resultMap = storeService.findActiveStoreListByUserId(userId, false, pageable);
 			logger.info("size " + resultMap.size());
 

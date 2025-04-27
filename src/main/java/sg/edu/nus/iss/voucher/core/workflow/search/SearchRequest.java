@@ -1,9 +1,8 @@
-package sg.edu.nus.iss.voucher.core.workflow.dto;
+package sg.edu.nus.iss.voucher.core.workflow.search;
 
 import jakarta.validation.constraints.Size;
 
 public class SearchRequest {
-
     
     @Size(min = 3, max = 10, message = "Query must be between 3 and 10 characters")
     private String query;
