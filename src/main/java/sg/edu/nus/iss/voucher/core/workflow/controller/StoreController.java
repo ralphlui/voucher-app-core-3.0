@@ -3,6 +3,7 @@ package sg.edu.nus.iss.voucher.core.workflow.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import jakarta.validation.Valid;
 import sg.edu.nus.iss.voucher.core.workflow.dto.APIResponse;
@@ -26,7 +28,7 @@ import sg.edu.nus.iss.voucher.core.workflow.enums.HTTPVerb;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.exception.StoreNotFoundException;
 import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
-import sg.edu.nus.iss.voucher.core.workflow.search.SearchRequest;
+import sg.edu.nus.iss.voucher.core.workflow.search.StoreSearchRequest;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.AuditService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.StoreService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
@@ -65,7 +67,8 @@ public class StoreController {
 
 	@GetMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllActiveStoreList(
-			@RequestHeader("Authorization") String authorizationHeader, @Valid SearchRequest searchRequest) {
+			@RequestHeader("Authorization") String authorizationHeader, @RequestParam Map<String, String> allParams,
+			@Valid StoreSearchRequest searchRequest) {
 		String activityType = "GetAllActiveStoreList";
 		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.GET;
@@ -73,7 +76,22 @@ public class StoreController {
 		String userId = INVALID_USER_ID;
 		try {
 			userId = jwtService.retrieveUserID(authorizationHeader);
-			String safeQuery = HtmlSanitizerUtil.sanitize(searchRequest.getQuery());
+			Set<String> allowedParams = Set.of("query", "page", "size");
+
+			for (String param : allParams.keySet()) {
+				if (!allowedParams.contains(param)) {
+					message = "Unknown parameter: " + param;
+
+					return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
+							message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
+
+				}
+			}
+			String query = searchRequest.getQuery();
+			if (query == null) {
+				query = "";
+			}
+			String safeQuery = HtmlSanitizerUtil.sanitize(HtmlUtils.htmlEscape(query));
 
 			Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(),
 					Sort.by("storeName").ascending());
@@ -183,8 +201,8 @@ public class StoreController {
 	@PostMapping(value = "/users", produces = "application/json")
 	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllStoreByUser(
 			@RequestHeader("Authorization") String authorizationHeader, @RequestBody StoreRequest storeRequest,
-			 @Valid SearchRequest searchRequest) {
-  
+			@Valid StoreSearchRequest searchRequest) {
+
 		String message = "";
 		String activityType = "GetAllStoreListByUserId";
 		String endpoint = String.format("api/core/stores/users");
@@ -213,7 +231,8 @@ public class StoreController {
 				}
 			}
 
-			Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(), Sort.by("storeName").ascending());
+			Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(),
+					Sort.by("storeName").ascending());
 			Map<Long, List<StoreDTO>> resultMap = storeService.findActiveStoreListByUserId(userId, false, pageable);
 			logger.info("size " + resultMap.size());
 

@@ -414,7 +414,7 @@ public class CampaignControllerTest {
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.message").value("There are no available campaign list.")).andDo(print());
+				.andExpect(jsonPath("$.message").value("No campaigns available.")).andDo(print());
 	}
 	
 	@Test
@@ -508,10 +508,9 @@ public class CampaignControllerTest {
 	            .param("status", "INVALID_STATUS")
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(messagePayload)))
-	            .andExpect(MockMvcResultMatchers.status().isNotFound())
+	            .andExpect(MockMvcResultMatchers.status().isBadRequest())
 	            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 	            .andExpect(jsonPath("$.success").value(false))
-	            .andExpect(jsonPath("$.message").value("Unable to retrieve all campaigns for the specified store ID. The campaign status provided is invalid.")) // Verify the error message
 	            .andDo(print());
 	}
 

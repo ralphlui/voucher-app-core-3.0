@@ -50,7 +50,7 @@ import sg.edu.nus.iss.voucher.core.workflow.dto.ValidationResult;
 import sg.edu.nus.iss.voucher.core.workflow.entity.Store;
 import sg.edu.nus.iss.voucher.core.workflow.enums.UserRoleType;
 import sg.edu.nus.iss.voucher.core.workflow.jwt.JWTService;
-import sg.edu.nus.iss.voucher.core.workflow.search.SearchRequest;
+import sg.edu.nus.iss.voucher.core.workflow.search.StoreSearchRequest;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.StoreService;
 import sg.edu.nus.iss.voucher.core.workflow.service.impl.UserValidatorService;
 import sg.edu.nus.iss.voucher.core.workflow.strategy.impl.StoreValidationStrategy;
@@ -134,7 +134,7 @@ public class StoreControllerTest {
 		Map<Long, List<StoreDTO>> mockStoreMap = new HashMap<>();
 		mockStoreMap.put(0L, mockStores);
 		
-		SearchRequest searchRequest = new SearchRequest();
+		StoreSearchRequest searchRequest = new StoreSearchRequest();
         searchRequest.setQuery("MUJI");
         searchRequest.setPage(0);
         searchRequest.setSize(10);
@@ -180,7 +180,7 @@ public class StoreControllerTest {
 	void testGetAllActiveStore_ShouldReturnInternalServerError_WhenExceptionOccurs() throws Exception {
 	    Pageable pageable = PageRequest.of(0, 10, Sort.by("storeName").ascending());
 	    
-	    SearchRequest searchRequest = new SearchRequest();
+	    StoreSearchRequest searchRequest = new StoreSearchRequest();
         searchRequest.setQuery("ikea");
         searchRequest.setPage(0);
         searchRequest.setSize(10);
