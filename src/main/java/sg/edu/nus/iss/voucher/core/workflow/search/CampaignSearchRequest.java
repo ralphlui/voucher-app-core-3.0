@@ -10,7 +10,7 @@ import sg.edu.nus.iss.voucher.core.workflow.enums.CampaignStatus;
 @Setter
 public class CampaignSearchRequest {
        
-	@Size(max = 50, message = "Description must not be greater than 50 characters")
+	@Size(min = 1, max = 50, message = "Description must be between 1 and 50 characters")
 	private String description;
     
 	@Min(0)
