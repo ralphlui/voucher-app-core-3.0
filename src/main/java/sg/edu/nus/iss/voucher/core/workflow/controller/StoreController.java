@@ -73,6 +73,7 @@ public class StoreController {
 		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
+		String sanitizedQuery="";
 		String userId = INVALID_USER_ID;
 		try {
 			userId = jwtService.retrieveUserID(authorizationHeader);
@@ -87,15 +88,28 @@ public class StoreController {
 
 				}
 			}
+			
+			
 			String query = searchRequest.getQuery();
 			if (query == null) {
 				query = "";
 			}
-			String safeQuery = HtmlSanitizerUtil.sanitize(HtmlUtils.htmlEscape(query));
+			if (!query.equals("")) {
+				sanitizedQuery = HtmlSanitizerUtil.sanitize(query);
+
+				if (sanitizedQuery.isEmpty()) {
+
+					message = "Invalid input detected in description. Potential XSS attack.";
+
+					return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
+							message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
+				}
+			}
+			
 
 			Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(),
 					Sort.by("storeName").ascending());
-			Map<Long, List<StoreDTO>> resultMap = storeService.getAllActiveStoreList(safeQuery, pageable);
+			Map<Long, List<StoreDTO>> resultMap = storeService.getAllActiveStoreList(sanitizedQuery, pageable);
 			logger.info("size" + resultMap.size());
 
 			Map.Entry<Long, List<StoreDTO>> firstEntry = resultMap.entrySet().iterator().next();
