@@ -97,7 +97,7 @@ public class CampaignController {
 
 				if (sanitizedDescription.isEmpty()) {
 
-					message = "Invalid input detected in description. Potential XSS attack.";
+					message = "Invalid input detected in Description. Potential XSS attack.";
 
 					auditService.logAudit(auditDTO, 400, message, "");
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));

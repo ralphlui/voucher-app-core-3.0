@@ -99,7 +99,7 @@ public class StoreController {
 
 				if (sanitizedQuery.isEmpty()) {
 
-					message = "Invalid input detected in description. Potential XSS attack.";
+					message = "Invalid input detected in Query. Potential XSS attack.";
 
 					return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
 							message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
