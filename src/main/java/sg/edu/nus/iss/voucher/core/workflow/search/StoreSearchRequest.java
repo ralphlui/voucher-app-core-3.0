@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class StoreSearchRequest {
     
-	@Size(max = 50, message = "Query must not be greater than 50 characters")
+	@Size(min = 1, max = 50, message = "Query must be between 1 and 50 characters")
     private String query;
     
 	@Min(0)
