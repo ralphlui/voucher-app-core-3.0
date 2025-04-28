@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
 		logger.error(message);
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 	}
-
+	
 	@SuppressWarnings("rawtypes")
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseBody
@@ -44,12 +44,15 @@ public class GlobalExceptionHandler {
 		for (FieldError error : ex.getBindingResult().getFieldErrors()) {
 			String fieldName = error.getField();
 			String defaultMessage = error.getDefaultMessage();
-
-			if ("page".equals(fieldName) || "size".equals(fieldName)) {
-				errorMessage.append(String.format("The '%s' field must be a valid positive integer. ", fieldName));
-			} else {
-				errorMessage.append(String.format("Invalid value for '%s': %s. ", fieldName, defaultMessage));
-			}
+	
+	        if (defaultMessage != null && defaultMessage.contains("Failed to convert property value")) {
+	            errorMessage.append(String.format("Invalid value for '%s': Value is not a valid option. ", fieldName));
+	        }
+	        else if ("page".equals(fieldName) || "size".equals(fieldName)) {
+	            errorMessage.append(String.format("The '%s' field must be a valid positive integer. ", fieldName));
+	        } else {
+	            errorMessage.append(String.format("Invalid value for '%s': %s. ", fieldName, defaultMessage));
+	        }
 		}
 
 		String message = errorMessage.toString();
