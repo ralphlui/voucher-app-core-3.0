@@ -1,52 +1,25 @@
 package sg.edu.nus.iss.voucher.core.workflow.search;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 import sg.edu.nus.iss.voucher.core.workflow.enums.CampaignStatus;
 
+@Getter
+@Setter
 public class CampaignSearchRequest {
        
-    @Size(min = 3, max = 50, message = "Description must be between 3 and 50 characters")
-    private String description;
+	@Size(max = 50, message = "Description must not be greater than 50 characters")
+	private String description;
     
+	@Min(0)
     private int page = 0;
 
-    private int size = 10;
+    @Min(1)
+    private int size = 50;
     
     private CampaignStatus status;
-
-
-	public int getPage() {
-		return page;
-	}
-
-	public void setPage(int page) {
-		this.page = page;
-	}
-
-	public int getSize() {
-		return size;
-	}
-
-	public void setSize(int size) {
-		this.size = size;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public CampaignStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(CampaignStatus status) {
-		this.status = status;
-	} 	
-	
 	
 
 }
