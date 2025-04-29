@@ -59,6 +59,13 @@ public class CampaignController {
 
 	public static final String CAMPAIGNS_ENDPOINT = "/api/core/campaigns";
 	public static final String INVALID_USER_ID = "Invalid UserID";
+	private static final String UNKNOWN_PARAM_PREFIX = "Unknown parameter: ";
+	
+	private static final String PARAM_DESCRIPTION = "description";
+	private static final String PARAM_PAGE = "page";
+	private static final String PARAM_SIZE = "size";
+
+	
 
 	@GetMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllActiveCampaigns(
@@ -70,17 +77,21 @@ public class CampaignController {
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
 		String sanitizedDescription = "";
+		
 
 		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix,
 				CAMPAIGNS_ENDPOINT, httpMethod);
 
 		try {
+			
+			Set<String> allowedParams = Set.of(
+				    PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE
+				);
 
-			Set<String> allowedParams = Set.of("description", "page", "size");
-
+			
 			for (String param : allParams.keySet()) {
 				if (!allowedParams.contains(param)) {
-					message = "Unknown parameter: " + param;
+					message = UNKNOWN_PARAM_PREFIX + param;
 
 					auditService.logAudit(auditDTO, 500, message, "");
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
@@ -159,11 +170,14 @@ public class CampaignController {
 
 		try {
 
-			Set<String> allowedParams = Set.of("description", "status", "page", "size");
+			Set<String> allowedParams = Set.of(
+				    PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE
+				);
+
 
 			for (String param : allParams.keySet()) {
 				if (!allowedParams.contains(param)) {
-					message = "Unknown parameter: " + param;
+					message = UNKNOWN_PARAM_PREFIX + param;
 
 					auditService.logAudit(auditDTO, 500, message, "");
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
@@ -270,11 +284,14 @@ public class CampaignController {
 
 			String userId = GeneralUtility.makeNotNull(messagePayload.getUserId()).trim();
 
-			Set<String> allowedParams = Set.of("description", "page", "size");
+			Set<String> allowedParams = Set.of(
+				    PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE
+				);
+
 
 			for (String param : allParams.keySet()) {
 				if (!allowedParams.contains(param)) {
-					message = "Unknown parameter: " + param;
+					message = UNKNOWN_PARAM_PREFIX + param;
 
 					auditService.logAudit(auditDTO, 500, message, "");
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
