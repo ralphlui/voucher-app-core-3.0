@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import sg.edu.nus.iss.voucher.core.workflow.dto.APIResponse;
 import sg.edu.nus.iss.voucher.core.workflow.dto.AuditDTO;
@@ -68,7 +69,8 @@ public class StoreController {
 	@GetMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllActiveStoreList(
 			@RequestHeader("Authorization") String authorizationHeader, @RequestParam Map<String, String> allParams,
-			@Valid StoreSearchRequest searchRequest) {
+			@Valid StoreSearchRequest searchRequest,
+			 HttpServletRequest request) {
 		String activityType = "GetAllActiveStoreList";
 		String endpoint = API_CORE_STORES_ENDPOINT;
 		HTTPVerb httpMethod = HTTPVerb.GET;
@@ -77,6 +79,17 @@ public class StoreController {
 		String userId = INVALID_USER_ID;
 		try {
 			userId = jwtService.retrieveUserID(authorizationHeader);
+			
+
+	        if (request.getMethod().equals("GET") && request.getContentLength() > 0) {
+	           
+	            message = "GET request should not contain a body.";
+	            
+	            return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
+						message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
+	        }
+			
+			
 			Set<String> allowedParams = Set.of("query", "page", "size");
 
 			for (String param : allParams.keySet()) {
