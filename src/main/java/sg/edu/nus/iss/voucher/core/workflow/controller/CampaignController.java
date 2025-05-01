@@ -60,12 +60,10 @@ public class CampaignController {
 	public static final String CAMPAIGNS_ENDPOINT = "/api/core/campaigns";
 	public static final String INVALID_USER_ID = "Invalid UserID";
 	private static final String UNKNOWN_PARAM_PREFIX = "Unknown parameter: ";
-	
+
 	private static final String PARAM_DESCRIPTION = "description";
 	private static final String PARAM_PAGE = "page";
 	private static final String PARAM_SIZE = "size";
-
-	
 
 	@GetMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<List<CampaignDTO>>> getAllActiveCampaigns(
@@ -77,18 +75,14 @@ public class CampaignController {
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
 		String sanitizedDescription = "";
-		
 
 		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix,
 				CAMPAIGNS_ENDPOINT, httpMethod);
 
 		try {
-			
-			Set<String> allowedParams = Set.of(
-				    PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE
-				);
 
-			
+			Set<String> allowedParams = Set.of(PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE);
+
 			for (String param : allParams.keySet()) {
 				if (!allowedParams.contains(param)) {
 					message = UNKNOWN_PARAM_PREFIX + param;
@@ -99,20 +93,11 @@ public class CampaignController {
 				}
 			}
 
-			String description = searchRequest.getDescription();
-			if (description == null) {
-				description = "";
-			}
-			if (!description.equals("")) {
-				sanitizedDescription = HtmlSanitizerUtil.sanitize( description);
-
-				if (sanitizedDescription.isEmpty()) {
-
-					message = "Invalid input detected in Description. Potential XSS attack.";
-
-					auditService.logAudit(auditDTO, 400, message, "");
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
-				}
+			sanitizedDescription = HtmlSanitizerUtil.sanitizeQuery(searchRequest.getDescription());
+			if (sanitizedDescription == null) {
+				message = "Invalid input detected in Query. Potential XSS attack.";
+				auditService.logAudit(auditDTO, 400, message, "");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
 			}
 
 			Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(),
@@ -164,16 +149,13 @@ public class CampaignController {
 		String endpoint = "/api/core/campaigns/stores";
 		HTTPVerb httpMethod = HTTPVerb.POST;
 		String message = "";
-		String sanitizedDescription ="";
+		String sanitizedDescription = "";
 		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix, endpoint,
 				httpMethod);
 
 		try {
 
-			Set<String> allowedParams = Set.of(
-				    PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE
-				);
-
+			Set<String> allowedParams = Set.of(PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE);
 
 			for (String param : allParams.keySet()) {
 				if (!allowedParams.contains(param)) {
@@ -190,7 +172,7 @@ public class CampaignController {
 				description = "";
 			}
 			if (!description.equals("")) {
-				 sanitizedDescription = HtmlSanitizerUtil.sanitize( description);
+				sanitizedDescription = HtmlSanitizerUtil.sanitize(description);
 
 				if (sanitizedDescription.isEmpty()) {
 
@@ -276,7 +258,7 @@ public class CampaignController {
 		String endpoint = "/api/core/campaigns/users";
 		HTTPVerb httpMethod = HTTPVerb.GET;
 		String message = "";
-		String sanitizedDescription="";
+		String sanitizedDescription = "";
 		AuditDTO auditDTO = auditService.createAuditDTO(INVALID_USER_ID, activityType, activityTypePrefix, endpoint,
 				httpMethod);
 
@@ -284,10 +266,7 @@ public class CampaignController {
 
 			String userId = GeneralUtility.makeNotNull(messagePayload.getUserId()).trim();
 
-			Set<String> allowedParams = Set.of(
-				    PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE
-				);
-
+			Set<String> allowedParams = Set.of(PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE);
 
 			for (String param : allParams.keySet()) {
 				if (!allowedParams.contains(param)) {
@@ -303,7 +282,7 @@ public class CampaignController {
 				description = "";
 			}
 			if (!description.equals("")) {
-				 sanitizedDescription = HtmlSanitizerUtil.sanitize( description);
+				sanitizedDescription = HtmlSanitizerUtil.sanitize(description);
 
 				if (sanitizedDescription.isEmpty()) {
 

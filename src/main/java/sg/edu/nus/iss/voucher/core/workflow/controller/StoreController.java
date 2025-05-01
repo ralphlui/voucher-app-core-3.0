@@ -65,91 +65,75 @@ public class StoreController {
 
 	@Value("${audit.activity.type.prefix}")
 	String activityTypePrefix;
-
+	
+	
 	@GetMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<List<StoreDTO>>> getAllActiveStoreList(
-			@RequestHeader("Authorization") String authorizationHeader, @RequestParam Map<String, String> allParams,
-			@Valid StoreSearchRequest searchRequest,
-			 HttpServletRequest request) {
-		String activityType = "GetAllActiveStoreList";
-		String endpoint = API_CORE_STORES_ENDPOINT;
-		HTTPVerb httpMethod = HTTPVerb.GET;
-		String message = "";
-		String sanitizedQuery="";
-		String userId = INVALID_USER_ID;
-		try {
-			userId = jwtService.retrieveUserID(authorizationHeader);
-			
+	        @RequestHeader("Authorization") String authorizationHeader,
+	        @RequestParam Map<String, String> allParams,
+	        @Valid StoreSearchRequest searchRequest,
+	        HttpServletRequest request) {
 
-	        if (request.getMethod().equals("GET") && request.getContentLength() > 0) {
-	           
+	    final String activityType = "GetAllActiveStoreList";
+	    final String endpoint = API_CORE_STORES_ENDPOINT;
+	    final HTTPVerb httpMethod = HTTPVerb.GET;
+	    String userId = INVALID_USER_ID;
+	    String message = "";
+
+	    try {
+	        userId = jwtService.retrieveUserID(authorizationHeader);
+
+	        if (isGetWithBody(request)) {
 	            message = "GET request should not contain a body.";
-	            
 	            return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
-						message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
+	                    message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
 	        }
-			
-			
-			Set<String> allowedParams = Set.of("query", "page", "size");
 
-			for (String param : allParams.keySet()) {
-				if (!allowedParams.contains(param)) {
-					message = "Unknown parameter: " + param;
+	        String paramValidationError = validateQueryParams(allParams);
+	        if (paramValidationError != null) {
+	            return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
+	                    paramValidationError, HttpStatus.BAD_REQUEST, "", authorizationHeader);
+	        }
 
-					return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
-							message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
+	        String sanitizedQuery = HtmlSanitizerUtil.sanitizeQuery(searchRequest.getQuery());
+	        if (sanitizedQuery == null) {
+	            message = "Invalid input detected in Query. Potential XSS attack.";
+	            return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
+	                    message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
+	        }
 
-				}
-			}
-			
-			
-			String query = searchRequest.getQuery();
-			if (query == null) {
-				query = "";
-			}
-			if (!query.equals("")) {
-				sanitizedQuery = HtmlSanitizerUtil.sanitize(query);
+	        Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(),
+	                Sort.by("storeName").ascending());
 
-				if (sanitizedQuery.isEmpty()) {
+	        Map<Long, List<StoreDTO>> resultMap = storeService.getAllActiveStoreList(sanitizedQuery, pageable);
+	        Map.Entry<Long, List<StoreDTO>> firstEntry = resultMap.entrySet().iterator().next();
 
-					message = "Invalid input detected in Query. Potential XSS attack.";
+	        long totalRecord = firstEntry.getKey();
+	        List<StoreDTO> storeDTOList = firstEntry.getValue();
 
-					return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
-							message, HttpStatus.BAD_REQUEST, "", authorizationHeader);
-				}
-			}
-			
+	        if (!storeDTOList.isEmpty()) {
+	            message = (GeneralUtility.makeNotNull(searchRequest.getQuery()).isEmpty())
+	                    ? "Successfully retrieved all active stores."
+	                    : "Successfully retrieved the stores matching the search criteria.";
+	            return handleResponseListAndSendAuditLogForSuccessCase(userId, activityType, endpoint, httpMethod,
+	                    message, storeDTOList, totalRecord, authorizationHeader);
+	        } else {
+	            message = (searchRequest.getQuery() == null || searchRequest.getQuery().isEmpty())
+	                    ? "No Active Store List."
+	                    : "No stores found matching the search criteria " + searchRequest.getQuery();
+	            return handleEmptyResponseListAndSendAuditLogForSuccessCase(userId, activityType, endpoint, httpMethod,
+	                    message, storeDTOList, totalRecord, authorizationHeader);
+	        }
 
-			Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(),
-					Sort.by("storeName").ascending());
-			Map<Long, List<StoreDTO>> resultMap = storeService.getAllActiveStoreList(sanitizedQuery, pageable);
-			logger.info("size" + resultMap.size());
-
-			Map.Entry<Long, List<StoreDTO>> firstEntry = resultMap.entrySet().iterator().next();
-			long totalRecord = firstEntry.getKey();
-			List<StoreDTO> storeDTOList = firstEntry.getValue();
-
-			if (storeDTOList.size() > 0) {
-				message = GeneralUtility.makeNotNull(searchRequest.getQuery()).isEmpty()
-						? "Successfully retrieved all active stores."
-						: "Successfully retrieved the stores matching the search criteria.";
-				return handleResponseListAndSendAuditLogForSuccessCase(userId, activityType, endpoint, httpMethod,
-						message, storeDTOList, totalRecord, authorizationHeader);
-
-			} else {
-				message = searchRequest.getQuery().isEmpty() ? "No Active Store List."
-						: "No stores found matching the search criteria " + searchRequest.getQuery();
-				return handleEmptyResponseListAndSendAuditLogForSuccessCase(userId, activityType, endpoint, httpMethod,
-						message, storeDTOList, totalRecord, authorizationHeader);
-			}
-
-		} catch (Exception e) {
-			message = "The attempt to retrieve active store list was unsuccessful.";
-			return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod, message,
-					HttpStatus.INTERNAL_SERVER_ERROR, e.toString(), authorizationHeader);
-		}
-
+	    } catch (Exception e) {
+	        message = "The attempt to retrieve active store list was unsuccessful.";
+	        return handleResponseListAndSendAuditLogForFailuresCase(userId, activityType, endpoint, httpMethod,
+	                message, HttpStatus.INTERNAL_SERVER_ERROR, e.toString(), authorizationHeader);
+	    }
 	}
+
+
+	
 
 	@PostMapping(value = "", produces = "application/json")
 	public ResponseEntity<APIResponse<StoreDTO>> createStore(@RequestHeader("Authorization") String authorizationHeader,
@@ -370,5 +354,20 @@ public class StoreController {
 		return ResponseEntity.status(httpStatusCode).body(APIResponse.error(message));
 
 	}
+	
+	private boolean isGetWithBody(HttpServletRequest request) {
+	    return "GET".equals(request.getMethod()) && request.getContentLength() > 0;
+	}
+
+	private String validateQueryParams(Map<String, String> params) {
+	    Set<String> allowedParams = Set.of("query", "page", "size");
+	    for (String param : params.keySet()) {
+	        if (!allowedParams.contains(param)) {
+	            return "Unknown parameter: " + param;
+	        }
+	    }
+	    return null;
+	}
+
 
 }

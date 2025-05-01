@@ -11,4 +11,11 @@ public class HtmlSanitizerUtil {
     public static String sanitize(String htmlInput) {
         return POLICY.sanitize(htmlInput);
     }
+    
+    public static String sanitizeQuery(String query) {
+	    if (query == null || query.isEmpty()) return "";
+	    String sanitized = HtmlSanitizerUtil.sanitize(query);
+	    return sanitized.isEmpty() ? null : sanitized;
+	}
+
 }
