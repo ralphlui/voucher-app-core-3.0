@@ -62,6 +62,7 @@ public class CampaignController {
 	private static final String UNKNOWN_PARAM_PREFIX = "Unknown parameter: ";
 
 	private static final String PARAM_DESCRIPTION = "description";
+	private static final String PARAM_STATUS = "status";
 	private static final String PARAM_PAGE = "page";
 	private static final String PARAM_SIZE = "size";
 
@@ -155,7 +156,7 @@ public class CampaignController {
 
 		try {
 
-			Set<String> allowedParams = Set.of(PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE);
+			Set<String> allowedParams = Set.of(PARAM_STATUS,PARAM_DESCRIPTION, PARAM_PAGE, PARAM_SIZE);
 
 			for (String param : allParams.keySet()) {
 				if (!allowedParams.contains(param)) {
